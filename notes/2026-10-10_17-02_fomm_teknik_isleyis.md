@@ -1,0 +1,33 @@
+# FOMM Teknik İşleyişi
+**Tarih / Saat:** 2026-10-10 17:02
+
+## 1. Keypoint ve Türev Mantığı
+
+Model, yüzdeki kritik hareket noktalarını (Keypoint) tespit ederken iki bilgi çıkarır:
+1. **Konum (x, y):** Noktanın ekranda tam nerede olduğu.
+2. **Yerel Değişim / Türev (Jacobian):** Noktanın etrafındaki dokunun hareket yönü.
+   - Sadece noktanın kayması değil; o bölgenin **açısal dönüşü (rotation)**, **büyüyüp küçülmesi (scale)** ve **esnemesi (shear)** 4 parametrelik bir matrisle takip edilir.
+
+## 2. Neden 1. Derece (First-Order)?
+
+- **0. Derece Yaklaşım:** Noktayı sadece $(x, y)$'den $(x', y')$'ye taşır. Derinin bükülmesini hesaba katamaz, sonuç robotik ve sert olur.
+- **1. Derece Yaklaşım:** Noktayı taşırken, çevresindeki pikselleri de türev bilgisine göre eğer ve büker. Mimikler bu sayede organik akar.
+
+## 3. Sistem Akışı (Pipeline)
+
+```mermaid
+flowchart LR
+    KP["1. Keypoint & Türev Tespiti<br/>(Source & Driving)"] --> DMN["2. Dense Motion Network"]
+    DMN --> Flow["Optik Akış Izgarası (Flow Grid)"]
+    DMN --> Mask["Kapanma Maskesi (Occlusion Mask)"]
+    Flow --> Warp["3. Feature Warping<br/>(Fotoğrafı Akışa Göre Bükme)"]
+    Mask --> Gen["4. Generator (Eksikleri Tamamlama)"]
+    Warp --> Gen
+    Gen --> Out["Canlandırılmış Çıktı"]
+```
+
+## 4. Modüllerin Görevleri
+
+1. **Keypoint Detector:** Yüzde hareketi en iyi açıklayan 10-20 referans noktayı ve yerel esneme katsayılarını otomatik bulur.
+2. **Dense Motion Network:** Ayrık noktaları tüm yüzeyle birleştirip genel bir hareket ızgarası üretir. Ayrıca kafa döndüğünde görünmeyen alanları (occlusion) belirler.
+3. **Generator:** Kaynak fotoğrafın katmanlarını hareket ızgarasına göre kaydırır; fotoğrafta olmayan alanları (açılan ağız içi vb.) gerçekçi şekilde tamamlayıp son kareyi üretir.
