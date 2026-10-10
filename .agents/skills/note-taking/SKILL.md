@@ -5,20 +5,33 @@ description: Standard operating procedure for creating and maintaining chronolog
 
 # Note-Taking & Documentation Skill
 
-## 1. Directory Structure & Naming
+## 1. Directory Structure & File Naming
 
-- Notes live in `notes/`.
-- File naming: `YYYY-MM-DD_<topic>.md` (e.g., `2026-10-10_standard_gans_concept.md`).
+- **Dizin:** Tüm notlar `notes/` altında saklanır.
+- **Dosya İsimlendirme:** Kronolojik sıralama için mutlaka tarih ve saat-dakika içermelidir:
+  - Format: `YYYY-MM-DD_HH-MM_<topic>.md`
+  - Örnek: `2026-10-10_16-29_gan_ve_face_reenactment.md`
+- **Asset Dizini:** Notlarda kullanılan yerel görseller `notes/assets/` altına kaydedilir.
 
-## 2. Hard Brevity Constraints
+## 2. Note Structure & Metadata
 
-- **Language:** All notes must be written in Turkish (Türkçe). Keep technical terms in their original English form (e.g., generator, discriminator, latent space, loss, warp, keypoint).
-- **Length:** Up to 50 lines maximum. Keep notes concise and scannable.
-- **No Meta Content:** Do not include questions, prompts, or commentary.
+- Her notun en başında başlık ve hemen altında tarih/saat bilgisi yer almalıdır:
+  ```markdown
+  # <Konu Başlığı>
 
-## 3. Visuals & Diagrams
+  **Tarih / Saat:** YYYY-MM-DD HH:MM
+  ```
 
-- **Diagrams:** Use inline Mermaid code blocks (`flowchart`, etc.) directly inside Markdown.
-- **Image Usage:** Include images when necessary to clarify architectures, math concepts, or visual results.
-- **Local Assets:** External images must be downloaded and stored locally in `notes/assets/` to avoid broken links.
-- **References & Citations:** Every image used MUST include an explicit source reference (paper name, authors, or project URL).
+## 3. Hard Brevity & Language Constraints
+
+- **Dil:** Not metni Türkçe yazılacaktır.
+- **Teknik Terminoloji:** Tüm teknik terimler ve konseptler orijinal İngilizce formlarında bırakılacaktır (örn. _generator_, _discriminator_, _keypoint_, _dense flow_, _occlusion mask_, _warp_, _inpainting_, _latent space_).
+- **Uzunluk Sınırı:** Bir not en fazla **50 satır** olabilir. Gereksiz dolgu metinlerinden kaçınılmalı, taranabilir ve maddeli tutulmalıdır.
+- **Meta Content Yasağı:** Not içine soru, model monoloğu, prompt kalıntıları veya "bu notta şunlar anlatılmaktadır" gibi meta yorumlar yazılmayacaktır.
+
+## 4. Visuals, Diagrams & Citations
+
+- **Diyagramlar:** Akış ve mimari şemaları için yalnızca Markdown içi **Mermaid** blokları kullanılmalıdır.
+- **Görsel Kullanımı:** Kavramları, mimariyi veya deneysel sonuçları somutlaştırmak için gerekli yerlerde görsel eklenmelidir.
+- **Yerel Saklama:** Dış kaynaklı görseller link kopmasını önlemek için `notes/assets/` klasörüne indirilip oradan göreceli yol ile (`assets/<dosya>`) çağrılmalıdır.
+- **Zorunlu Kaynakça:** Kullanılan her görselin altına mutlaka açık kaynak referansı (_Paper adı, yazar veya proje bağlantısı_) yazılmalıdır.
