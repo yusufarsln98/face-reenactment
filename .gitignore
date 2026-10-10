@@ -1,0 +1,33 @@
+# Virtual environment
+fomm_env/
+env/
+venv/
+
+# Pretrained model weights
+*.pth.tar
+*.pth
+vox-cpk.pth.tar
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# macOS system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Legacy clone repositories
+tpsmm/
+first-order-model/
+
+# IDE
+.vscode/
+.idea/
+
+

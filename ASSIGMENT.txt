@@ -1,0 +1,50 @@
+Assignment: Exploring DeepFakes
+
+Your task is to implement a DeepFake machine learning model — or any model that achieves a comparable face reenactment or identity-mapping effect.
+The assignment is designed to explore how far the brightest and most ambitious minds can go when working as a team in a short period of time.
+Rules & Freedom
+
+You may use any tools, libraries, pretrained models, or AI assistants you like.
+However, you must fully understand what you are doing — and be able to explain the core logic, not just run existing code.
+You are strongly encouraged to:
+explore different architectures (autoencoder, GAN, diffusion, keypoint-based, etc.),
+document every choice and turning point,
+include failed experiments and discuss why they failed,
+and reflect on what each experiment taught you.
+Output Requirements
+
+Generate short, light-hearted demonstration videos (keep them ethical, safe, and consent-based — don’t get us into trouble!).
+Accompany your work with clear documentation and a presentation.
+After the Assignment, You Should Be Able To
+
+Explain how your model works (conceptually).
+Describe its architecture and data flow.
+Discuss how training and evaluation are performed.
+(Hint: smart students will recognize how this ties into the final exam topics.)
+Have a working version on your own computer that can provide endless joy to your friends and family.
+Group Formation
+
+Group 1: Students with student ID% 3 == 0
+Group 2: Students with student ID% 3 == 1
+Group 3: Students with student ID% 3 == 2
+
+Remember — this is a perfect opportunity to bond with your classmates. Teamwork will be part of the assessment.
+Deliverables
+
+Class Presentation (≈30 minutes)
+Demonstrate your results.
+Explain your approach and lessons learned.
+Discuss limitations and ethical implications.
+Written Report
+Describe what you did, how you did it, and what you learned.
+Use your own words (no AI assistance in the report text, I can write better prompts than you, and have no interest in reading GPT bullshit filler).
+Include evidence of at least two team meetings (Online or Face to Face) — screenshots, photos, or kebab receipts accepted.
+You may exclude inactive members from authorship.
+Each student has to submit the report (even if it is the same report).
+Optional (but impressive)
+
+Include a comparison between methods (e.g., Autoencoder vs GAN vs Diffusion).
+Add a DeepFake detection experiment or artifact analysis.
+Discuss ethical challenges and countermeasures.
+
+Do not forget to have fun!
