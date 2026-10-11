@@ -13,20 +13,7 @@ Dense Motion Network, pikselleri sadece kaydırmaz; her bölge için bir **Occlu
 
 ## 3. Aşama 2: Eksik Alanları Çizme (Inpainting)
 
-```mermaid
-flowchart LR
-    subgraph Tespit["1. Tespit"]
-        Occ["Occlusion Mask<br/>(Neresi Boşluk?)"]
-    end
-    subgraph Uretim["2. Sentez (Generator)"]
-        Hafiza["Yüz Hafızası<br/>(Veri setinden öğrenilen diş/kulak yapısı)"]
-        Context["Kaynak Kişinin Özellikleri<br/>(Ten rengi, çene yapısı, ışık)"]
-        Occ --> Gen["Inpainting Katmanı"]
-        Hafiza --> Gen
-        Context --> Gen
-    end
-    Gen --> Out["Eksiksiz Çıktı Kare"]
-```
+![Occlusion ve Inpainting Akışı](assets/diagram_occlusion_inpainting.svg)
 
 Generator, eğitim sırasında milyonlarca yüz videosundan insan anatomisini öğrenmiştir:
 1. Deliğin büyüklüğünü ve açısını inceler.

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 240" width="100%" height="100%">
+  <defs>
+    <style>
+      .box { fill: #ffffff; stroke: #1e293b; stroke-width: 1.2; rx: 4px; }
+      .data-box { fill: #f8fafc; stroke: #334155; stroke-width: 1.2; rx: 4px; }
+      .final-box { fill: #ffffff; stroke: #0f172a; stroke-width: 1.8; rx: 4px; }
+      .node-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 600; fill: #0f172a; text-anchor: middle; }
+      .node-subtext { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 400; fill: #64748b; text-anchor: middle; }
+      .edge { stroke: #1e293b; stroke-width: 1.2; fill: none; }
+    </style>
+    <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <polygon points="0 0, 6 3, 0 6" fill="#1e293b"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#ffffff"/>
+
+  <!-- 1. Keypoint & Jacobian Detection -->
+  <rect x="30" y="91" width="175" height="58" class="box"/>
+  <text x="117.5" y="115" class="node-text">1. Keypoint &amp; Jacobian</text>
+  <text x="117.5" y="133" class="node-subtext">Source &amp; Driving</text>
+
+  <!-- Arrow to Dense Motion -->
+  <line x1="205" y1="120" x2="248" y2="120" class="edge" marker-end="url(#arrow)"/>
+
+  <!-- 2. Dense Motion Network -->
+  <rect x="250" y="91" width="180" height="58" class="box"/>
+  <text x="340" y="115" class="node-text">2. Dense Motion Network</text>
+  <text x="340" y="133" class="node-subtext">Taylor Approximation</text>
+
+  <!-- Branching Arrows from Dense Motion -->
+  <path d="M 430 108 L 455 108 L 455 64 L 473 64" class="edge" marker-end="url(#arrow)"/>
+  <path d="M 430 132 L 455 132 L 455 176 L 473 176" class="edge" marker-end="url(#arrow)"/>
+
+  <!-- Optical Flow Grid -->
+  <rect x="475" y="35" width="175" height="58" class="data-box"/>
+  <text x="562.5" y="59" class="node-text">Optical Flow Grid (T)</text>
+  <text x="562.5" y="77" class="node-subtext">Dense Deformation</text>
+
+  <!-- Occlusion Mask -->
+  <rect x="475" y="147" width="175" height="58" class="data-box"/>
+  <text x="562.5" y="171" class="node-text">Occlusion Mask (O)</text>
+  <text x="562.5" y="189" class="node-subtext">Missing Parts [0, 1]</text>
+
+  <!-- Arrow Optical Flow -> Feature Warping -->
+  <line x1="650" y1="64" x2="693" y2="64" class="edge" marker-end="url(#arrow)"/>
+
+  <!-- 3. Feature Warping -->
+  <rect x="695" y="35" width="170" height="58" class="box"/>
+  <text x="780" y="59" class="node-text">3. Feature Warping</text>
+  <text x="780" y="77" class="node-subtext">Warp Source Features</text>
+
+  <!-- Merging into 4. Generator -->
+  <path d="M 865 64 L 890 64 L 890 108 L 908 108" class="edge" marker-end="url(#arrow)"/>
+  <path d="M 650 176 L 890 176 L 890 132 L 908 132" class="edge" marker-end="url(#arrow)"/>
+
+  <!-- 4. Generator (Inpainting) -->
+  <rect x="910" y="91" width="160" height="58" class="box"/>
+  <text x="990" y="115" class="node-text">4. Generator</text>
+  <text x="990" y="133" class="node-subtext">Inpainting Module</text>
+
+  <!-- Arrow Generator -> Output -->
+  <line x1="1070" y1="120" x2="1113" y2="120" class="edge" marker-end="url(#arrow)"/>
+
+  <!-- 5. Output -->
+  <rect x="1115" y="91" width="135" height="58" class="final-box"/>
+  <text x="1182.5" y="115" class="node-text">Animated</text>
+  <text x="1182.5" y="133" class="node-text">Output</text>
+</svg>

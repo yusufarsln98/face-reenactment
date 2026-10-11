@@ -31,7 +31,11 @@ description: Standard operating procedure for creating and maintaining chronolog
 
 ## 4. Visuals, Diagrams & Citations
 
-- **Diyagramlar:** Akış ve mimari şemaları için yalnızca Markdown içi **Mermaid** blokları kullanılmalıdır.
+- **Diyagramlar ve Grafikler (Akademik Rapor SVG Standardı):**
+  - Tüm mimari ve akış şemaları (Mermaid diyagramları dahil) raporda ve slaytlarda kullanılmak üzere **SVG (`.svg`) formatında** üretilmelidir.
+  - **Tasarım Stili:** Şemalar aşırı süslü gradyanlar ve gölgeler yerine **sade ve klasik akademik makale/rapor formatında** olmalıdır (temiz siyah/koyu gri kenarlıklar, beyaz veya çok açık nötr dolgular, sade oklar ve net tipografi).
+  - Üretilen tüm SVG dosyaları `notes/assets/` dizinine kaydedilmeli ve not içerisine `![Açıklama](assets/<dosya>.svg)` şeklinde eklenmelidir.
+  - Şema metinleri uluslararası akademik standart gereği İngilizce terminolojiyle yazılmalıdır.
 - **Görsel Kullanımı:** Kavramları, mimariyi veya deneysel sonuçları somutlaştırmak için gerekli yerlerde görsel eklenmelidir.
 - **Yerel Saklama:** Dış kaynaklı görseller link kopmasını önlemek için `notes/assets/` klasörüne indirilip oradan göreceli yol ile (`assets/<dosya>`) çağrılmalıdır.
 - **Zorunlu Kaynakça:** Kullanılan her görselin altına mutlaka açık kaynak referansı (_Paper adı, yazar veya proje bağlantısı_) yazılmalıdır.
