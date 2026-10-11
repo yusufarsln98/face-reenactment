@@ -1,0 +1,36 @@
+% --- Slide 3: Observations & Failure Analysis ---
+\begin{frame}{Custom Autoencoder: Observations \& Failure Analysis}
+    \begin{columns}[c]
+        \begin{column}{0.50\textwidth}
+            \begin{alertblock}{Why Did Face Swapping Fail?}
+                \small
+                \begin{itemize}
+                    \item \textbf{No Visual Progress:} Comparing 50 vs. 150 epochs showed no discernible improvement.
+                    \item \textbf{Reconstruction vs. Identity:} The A $\to$ B face did not look like Person B, and B $\to$ A did not look like Person A.
+                    \item \textbf{Objective Flaw:} Pixel-wise MSE trained the model to recreate the original face, not transfer identity.
+                    \item \textbf{Dataset Size:} 238 total images were insufficient to learn a generalized, disentangled latent space.
+                \end{itemize}
+            \end{alertblock}
+        \end{column}
+
+        \begin{column}{0.46\textwidth}
+            \centering
+            \textbf{\footnotesize Triplet Video Comparison Frame}
+
+            \vspace{0.15cm}
+            \includegraphics[width=\linewidth, height=2.1cm, keepaspectratio]{ae_vid_comp_B_to_A.png} \\
+            \vspace{0.05cm}
+            \scriptsize \textit{Comparison B $\to$ A (Input $\mid$ 50ep $\mid$ 150ep)}
+
+            \vspace{0.1cm}
+            \href{https://youtu.be/placeholder}{\scriptsize \underline{\textcolor{primaryNavy}{[comparison\_B\_to\_A.mp4 Video Link]}}}
+
+            \vspace{0.15cm}
+            \begin{block}{Key Takeaway}
+                \scriptsize
+                Shared latent code entangled identity with facial pose and expression.
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+

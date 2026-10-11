@@ -1,0 +1,58 @@
+% --- Slide 2: Training Loss & Generated Video Outputs ---
+\begin{frame}{Custom Autoencoder: Training Loss \& Video Outputs}
+    \begin{columns}[c]
+        \begin{column}{0.48\textwidth}
+            \small
+            \textbf{Training Schedule (150 Epochs)}
+            \begin{itemize}
+                \footnotesize
+                \item First trained 50 epochs, saved weights.
+                \item Resumed for another 100 epochs (150 total).
+            \end{itemize}
+
+            \vspace{0.1cm}
+            \centering
+            \footnotesize
+            \begin{tabular}{ccc}
+                \toprule
+                \textbf{Epoch} & \textbf{Person A MSE} & \textbf{Person B MSE} \\
+                \midrule
+                146 & 0.003046 & 0.001939 \\
+                147 & 0.003013 & 0.001929 \\
+                148 & 0.003014 & 0.001905 \\
+                149 & 0.002996 & 0.001882 \\
+                \textbf{150} & \textbf{0.002935} & \textbf{0.001866} \\
+                \bottomrule
+            \end{tabular}
+
+            \vspace{0.12cm}
+            \raggedright
+            \scriptsize \textit{Both models converged steadily; Person B achieved lower training loss.}
+        \end{column}
+
+        \begin{column}{0.48\textwidth}
+            \centering
+            \textbf{\footnotesize Generated Video Outputs}
+
+            \vspace{0.1cm}
+            \footnotesize
+            \begin{tabular}{lcc}
+                \toprule
+                \textbf{Epochs} & \textbf{A $\to$ B Video} & \textbf{B $\to$ A Video} \\
+                \midrule
+                50 ep & \texttt{\tiny deepfake\_A\_to\_B} & \texttt{\tiny deepfake\_B\_to\_A} \\
+                150 ep & \texttt{\tiny deepfake\_150\_A\_to\_B} & \texttt{\tiny deepfake\_150\_B\_to\_A} \\
+                \bottomrule
+            \end{tabular}
+
+            \vspace{0.15cm}
+            \includegraphics[width=\linewidth, height=1.9cm, keepaspectratio]{ae_vid_comp_A_to_B.png} \\
+            \vspace{0.05cm}
+            \scriptsize \textit{Comparison A $\to$ B (Input $\mid$ 50ep $\mid$ 150ep)}
+
+            \vspace{0.08cm}
+            \href{https://youtu.be/placeholder}{\tiny \underline{\textcolor{primaryNavy}{[Video: deepfake\_150\_A\_to\_B.mp4]}}} \quad
+            \href{https://youtu.be/placeholder}{\tiny \underline{\textcolor{primaryNavy}{[Video: comparison\_A\_to\_B.mp4]}}}
+        \end{column}
+    \end{columns}
+\end{frame}

@@ -1,0 +1,64 @@
+% --- Slide 4: Pretrained Models Benchmark (FaceFusion) ---
+\begin{frame}{Benchmarking Pretrained Models (FaceFusion)}
+    \begin{columns}[c]
+        \begin{column}{0.48\textwidth}
+            \small
+            \textbf{Inference Setup}
+            \begin{itemize}
+                \footnotesize
+                \item Tested 3 pretrained models in FaceFusion (no retraining).
+                \item Source face gives identity; target video gives movement.
+            \end{itemize}
+
+            \vspace{0.08cm}
+            \centering
+            \footnotesize
+            \begin{tabular}{lccc}
+                \toprule
+                \textbf{Model} & \textbf{Output Size} & \textbf{Frames} & \textbf{Duration} \\
+                \midrule
+                HyperSwap 1A & $576 \times 1024$ & 576 & $\sim$19.25\,s \\
+                InSwapper 128 & $576 \times 1024$ & 576 & $\sim$19.25\,s \\
+                SimSwap 256 & $576 \times 1024$ & 576 & $\sim$19.25\,s \\
+                \bottomrule
+            \end{tabular}
+
+            \vspace{0.12cm}
+            \raggedright
+            \small \textbf{Visual Comparison}
+            \begin{itemize}
+                \footnotesize
+                \item \textbf{HyperSwap \& InSwapper:} Fairly natural and consistent.
+                \item \textbf{SimSwap:} Followed motion, but showed artifacts around eyes and skin texture.
+            \end{itemize}
+        \end{column}
+
+        \begin{column}{0.48\textwidth}
+            \centering
+            \begin{columns}[c]
+                \begin{column}{0.31\linewidth}
+                    \centering
+                    \includegraphics[height=2.8cm, keepaspectratio]{ae_vid_ff_hyperswap.png} \\
+                    \tiny \textbf{HyperSwap 1A} \\
+                    \href{https://youtu.be/placeholder}{\tiny \underline{\textcolor{primaryNavy}{[Video Link]}}}
+                \end{column}
+                \begin{column}{0.31\linewidth}
+                    \centering
+                    \includegraphics[height=2.8cm, keepaspectratio]{ae_vid_ff_inswapper.png} \\
+                    \tiny \textbf{InSwapper 128} \\
+                    \href{https://youtu.be/placeholder}{\tiny \underline{\textcolor{primaryNavy}{[Video Link]}}}
+                \end{column}
+                \begin{column}{0.31\linewidth}
+                    \centering
+                    \includegraphics[height=2.8cm, keepaspectratio]{ae_vid_ff_simswap.png} \\
+                    \tiny \textbf{SimSwap 256} \\
+                    \href{https://youtu.be/placeholder}{\tiny \underline{\textcolor{primaryNavy}{[Video Link]}}}
+                \end{column}
+            \end{columns}
+
+            \vspace{0.12cm}
+            \scriptsize \textit{First frames: Erdem on Yusuf swaps}
+        \end{column}
+    \end{columns}
+\end{frame}
+

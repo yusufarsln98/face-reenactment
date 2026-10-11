@@ -1,0 +1,28 @@
+% --- Slide 5: Evaluation & Lessons Learned ---
+\begin{frame}{Autoencoders: Evaluation \& Lessons Learned}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \begin{block}{Overall Evaluation}
+                \small
+                \begin{itemize}
+                    \item Training our own autoencoder was not successful for face swapping.
+                    \item FaceFusion pretrained models gave much more promising results.
+                    \item Showed the importance of using models designed specifically for face swapping.
+                    \item Having only 100 images for Person A and 138 for Person B was a major limitation.
+                \end{itemize}
+            \end{block}
+        \end{column}
+
+        \begin{column}{0.48\textwidth}
+            \begin{exampleblock}{Lessons Learned (Erdem's Takeaways)}
+                \small
+                \begin{itemize}
+                    \item \textbf{Low loss $\neq$ usable result:} The model got better at reconstructing faces, but not at swapping them. Another 100 epochs did not fix this.
+                    \item \textbf{Beyond running tools:} Building our own model helped us understand preprocessing, training, and evaluation hands-on.
+                    \item Pretrained models helped us compare how task-specific designs improve the result.
+                \end{itemize}
+            \end{exampleblock}
+        \end{column}
+    \end{columns}
+\end{frame}
+
