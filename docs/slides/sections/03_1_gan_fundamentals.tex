@@ -4,18 +4,19 @@
 \begin{frame}{Standard GAN Architecture}
     \begin{columns}[c]
         \begin{column}{0.48\textwidth}
+            \small
             \textbf{How GANs Work (Goodfellow et al., 2014)}
             \begin{itemize}
-                \item Two neural networks competing against each other in an adversarial setup:
-                \item \textbf{Generator ($G$):} Takes a random noise vector $\mathbf{z}$ and learns to synthesize realistic facial images.
-                \item \textbf{Discriminator ($D$):} Evaluates images and classifies them as real (from dataset) or fake (from $G$).
-                \item \textbf{Adversarial training:} Through gradient feedback, $G$ progressively captures fine details and photorealistic textures.
+                \item Two neural networks competing in an adversarial setup:
+                \item \textbf{Generator ($G$):} Takes noise $\mathbf{z}$ and learns to generate realistic face images.
+                \item \textbf{Discriminator ($D$):} Evaluates images and decides if real or fake.
+                \item \textbf{Adversarial training:} $G$ gets feedback from $D$ and learns photorealistic textures.
             \end{itemize}
         \end{column}
 
         \begin{column}{0.50\textwidth}
             \centering
-            \includegraphics[width=\linewidth, height=4.2cm, keepaspectratio]{diagram_standard_gan.png}
+            \includegraphics[width=\linewidth, height=4.0cm, keepaspectratio]{diagram_standard_gan.png}
         \end{column}
     \end{columns}
 \end{frame}
@@ -27,17 +28,18 @@
             \begin{block}{Why Unconditional GANs Fall Short}
                 \small
                 \begin{itemize}
-                    \item Generates arbitrary faces from random noise $\mathbf{z}$.
-                    \item Identity, pose, and emotion are entangled in latent space.
+                    \item Generates arbitrary faces from noise $\mathbf{z}$.
+                    \item Identity, pose, and emotion are entangled in $\mathbf{z}$.
                     \item Cannot say: \textit{"keep Person A, copy Person B's expression"}.
                 \end{itemize}
             \end{block}
             
+            \vspace{-0.1cm}
             \begin{block}{What Face Reenactment Requires}
                 \small
                 \begin{itemize}
-                    \item \textbf{Identity conditioning:} Appearance anchored strictly to source portrait $S$.
-                    \item \textbf{Motion conditioning:} Facial dynamics driven frame-by-frame by driving video $D$.
+                    \item Keep source identity fixed: appearance from $S$.
+                    \item Motion driven externally: dynamics from $D$.
                 \end{itemize}
             \end{block}
         \end{column}

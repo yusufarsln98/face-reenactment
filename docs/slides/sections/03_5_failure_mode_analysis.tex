@@ -5,21 +5,21 @@
             \begin{block}{Experimental Setup}
                 \small
                 \begin{itemize}
-                    \item \textbf{Motivation:} Test how FOMM handles rare, out-of-distribution (OOD) facial features not present in training data.
-                    \item \textbf{Subject:} Source portrait with metallic dental braces (\texttt{bella\_poarch\_dis\_teli}).
-                    \item \textbf{Driving Motion:} Trajectory moving from head tilt to lip closure, ending in a wide squinting smile.
+                    \item \textbf{Goal:} Test FOMM on rare features absent from training data (OOD).
+                    \item \textbf{Subject:} Source portrait with metallic dental braces.
+                    \item \textbf{Motion:} Sequence from head tilt to lip closure and wide smile.
                 \end{itemize}
             \end{block}
         \end{column}
 
         \begin{column}{0.48\textwidth}
-            \begin{block}{Hypothesis \& Theoretical Basis}
+            \begin{block}{Hypothesis \& Expected Regimes}
                 \small
                 \begin{itemize}
-                    \item VoxCeleb training distribution contains virtually zero faces with dental braces.
-                    \item \textbf{Warping Regime ($O \approx 1$):} Optical flow directly samples source pixels $\to$ braces will be preserved.
-                    \item \textbf{Inpainting Regime ($O \approx 0$):} Under large deformation, model marks teeth as occluded and synthesizes them.
-                    \item \textbf{Prediction:} Inpainting will sample dataset average and erase braces.
+                    \item VoxCeleb training data has no faces with braces.
+                    \item \textbf{Warping ($O \approx 1$):} Samples source pixels $\to$ braces preserved.
+                    \item \textbf{Inpainting ($O \approx 0$):} Large deformation masks mouth $\to$ model synthesizes generic teeth.
+                    \item \textbf{Prediction:} Inpainting erases braces using dataset average.
                 \end{itemize}
             \end{block}
         \end{column}
@@ -29,20 +29,25 @@
 % --- Slide 2: Visual Evidence of Failure Mode (3x3 Grid) ---
 \begin{frame}{Failure Mode: Vanishing Dental Braces}
     \begin{columns}[c]
-        \begin{column}{0.54\textwidth}
+        \begin{column}{0.52\textwidth}
             \centering
-            \includegraphics[width=\linewidth, height=5.2cm, keepaspectratio]{dis_teli_kaybolma_analizi.png}
+            \includegraphics[width=\linewidth, height=4.5cm, keepaspectratio]{dis_teli_kaybolma_analizi.png}
             \vspace{0.05cm}
             
             \scriptsize \textit{Frame 10 (top), Frame 195 (middle), Frame 288 (bottom).}
         \end{column}
 
-        \begin{column}{0.44\textwidth}
+        \begin{column}{0.46\textwidth}
+            \small
             \textbf{Observed Generation Regimes:}
             \begin{itemize}
-                \item \textbf{Frame 10 (0.3s) --- Warping ($O \approx 1$):} Small motion maintains optical flow correspondence; source pixels cleanly transfer metallic brackets.
-                \item \textbf{Frame 195 (6.5s) --- Natural Occlusion:} Motion drives lip closure, temporarily concealing the mouth cavity.
-                \item \textbf{Frame 288 (9.6s) --- Inpainting ($O \approx 0$):} Large smile exceeds flow tracking; generator synthesizes generic teeth from learned priors, erasing braces.
+                \footnotesize
+                \item \textbf{Frame 10 (0.3s) --- Warping ($O \approx 1$):}\\
+                Small shift preserves flow; metallic brackets transfer cleanly.
+                \item \textbf{Frame 195 (6.5s) --- Lip Closure:}\\
+                Lips close, naturally hiding mouth interior.
+                \item \textbf{Frame 288 (9.6s) --- Inpainting ($O \approx 0$):}\\
+                Extreme smile triggers inpainting; generator paints generic teeth, erasing braces.
             \end{itemize}
         \end{column}
     \end{columns}
@@ -51,37 +56,37 @@
 % --- Slide 3: Root Cause Analysis & Video Links ---
 \begin{frame}{Technical Mechanism: Dual-Path Synthesis}
     \begin{columns}[T]
-        \begin{column}{0.52\textwidth}
+        \begin{column}{0.50\textwidth}
             \begin{block}{Synthesis Formulation}
                 \scriptsize
                 $$\text{Output} = (\text{Warped } S \odot O) + (G_{\text{inpaint}} \odot (1 - O))$$
             \end{block}
             
-            \vspace{-0.1cm}
+            \vspace{-0.15cm}
             \begin{block}{Operational Pathways}
-                \small
+                \footnotesize
                 \begin{itemize}
-                    \item \textbf{Warping Pathway ($O \approx 1$):} Samples directly from source image $S$, preserving individual identity textures (dental braces).
-                    \item \textbf{Inpainting Pathway ($O \approx 0$):} Activates under large deformation; synthesizes pixels using the VoxCeleb prior distribution (uniform white teeth).
+                    \item \textbf{Warping ($O \approx 1$):} Copies from source $S$, preserving identity details (braces).
+                    \item \textbf{Inpainting ($O \approx 0$):} Under deformation, synthesizes pixels from VoxCeleb average (plain teeth).
                 \end{itemize}
             \end{block}
         \end{column}
 
-        \begin{column}{0.44\textwidth}
+        \begin{column}{0.48\textwidth}
             \begin{block}{Core Finding}
-                \small
+                \footnotesize
                 \begin{itemize}
-                    \item Pixel fidelity depends on the active pathway for each local region.
-                    \item Regions with $O \approx 1$ preserve subject-specific details from $S$.
-                    \item Regions with $O \approx 0$ reflect training dataset bias rather than the source.
+                    \item Pixel fidelity depends on the active pathway.
+                    \item $O \approx 1$ regions preserve source specifics.
+                    \item $O \approx 0$ regions reflect training dataset bias.
                 \end{itemize}
             \end{block}
 
-            \vspace{0.1cm}
+            \vspace{-0.1cm}
             \begin{block}{Failure Mode Demo Video}
                 \scriptsize
                 \begin{itemize}
-                    \item \textbf{Dental Braces Comparison Video:} \href{https://youtu.be/TSRONFB7SBs}{\underline{\textcolor{primaryNavy}{Watch Online (External Link)}}}
+                    \item \textbf{Dental Braces Video:} \href{https://youtu.be/TSRONFB7SBs}{\underline{\textcolor{primaryNavy}{Watch Online (External Link)}}}
                 \end{itemize}
             \end{block}
         \end{column}

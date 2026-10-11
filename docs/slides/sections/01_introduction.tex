@@ -2,19 +2,20 @@
 
 \begin{frame}{Problem Formulation: Face Reenactment}
     \begin{columns}[c]
-        \begin{column}{0.55\textwidth}
+        \begin{column}{0.54\textwidth}
+            \small
             \textbf{Core Objective}
             \begin{itemize}
-                \item Animate a static \textbf{Source portrait ($S$)} using motion from a \textbf{Driving video ($D$)}.
+                \item Animate static \textbf{Source ($S$)} photo using motion from \textbf{Driving ($D$)} video.
                 \item Preserve identity of $S$, transfer motion dynamics from $D$.
             \end{itemize}
 
-            \vspace{0.3cm}
+            \vspace{0.15cm}
             \textbf{Key Technical Challenges}
             \begin{itemize}
-                \item \textbf{Identity preservation:} Prevent facial morphology from warping into the driving face.
-                \item \textbf{Non-rigid deformation:} Model complex skin stretching and expressions, not just rigid 2D shifts.
-                \item \textbf{Occlusion handling:} Handle disoccluded areas (teeth, inner mouth) unseen in the source image.
+                \item \textbf{Identity preservation:} Avoid warping face features into driving face.
+                \item \textbf{Non-rigid deformation:} Facial skin stretches (not just rigid 2D shift).
+                \item \textbf{Occlusion handling:} Mouth opening reveals unseen areas (teeth, tongue).
             \end{itemize}
         \end{column}
 
@@ -23,14 +24,14 @@
                 \small
                 \textbf{Inputs:}
                 \begin{itemize}
-                    \item A single static portrait image ($S$)
-                    \item An arbitrary driving video sequence ($D$)
+                    \item One static portrait photo ($S$)
+                    \item A driving video sequence ($D$)
                 \end{itemize}
-                \vspace{0.15cm}
+                \vspace{0.1cm}
                 \textbf{Output:}
                 \begin{itemize}
-                    \item Reenacted video sequence of $S$
-                    \item Mimicking head poses and facial expressions of $D$
+                    \item Reenacted video of $S$
+                    \item Mimicking expressions and head pose of $D$
                 \end{itemize}
             \end{block}
         \end{column}

@@ -25,15 +25,15 @@ for frame_d in driving_video:
         \end{column}
 
         \begin{column}{0.41\textwidth}
-            \textbf{Key Module Responsibilities}
+            \small \textbf{Core Modules}
             \begin{itemize}
-                \small
-                \item \texttt{keypoint\_detector}: Computes 10 unsupervised keypoint coordinates and local Jacobians.
-                \item \texttt{dense\_motion\_net}: Converts sparse point shifts into optical flow and an occlusion mask.
-                \item \texttt{generator}: Warps source pixels and inpaints missing details (mouth, teeth).
+                \footnotesize
+                \item \texttt{keypoint\_detector}: Extracts 10 unsupervised keypoints.
+                \item \texttt{dense\_motion\_net}: Computes optical flow and occlusion mask.
+                \item \texttt{generator}: Warps source pixels and inpaints mouth/teeth.
             \end{itemize}
 
-            \vspace{0.2cm}
+            \vspace{0.1cm}
             \begin{block}{Architectural Property}
                 \scriptsize \textbf{No Recurrence:} The loop carries no hidden state across frames ($t \to t+1$).
             \end{block}
@@ -47,35 +47,35 @@ for frame_d in driving_video:
         \small \textbf{Triplets: [Source Portrait $\mid$ Driving Frame $\mid$ Synthesized Result]}
     \end{center}
 
-    \vspace{0.1cm}
+    \vspace{0.05cm}
     \begin{columns}[c]
         \begin{column}{0.32\textwidth}
             \centering
-            \includegraphics[width=\linewidth, height=2.3cm, keepaspectratio]{bella_comparison_f30.png}
+            \includegraphics[width=\linewidth, height=2.1cm, keepaspectratio]{bella_comparison_f30.png}
             \vspace{0.05cm}
             
             \scriptsize \textit{Frame 30 (1.0s): Head Tilt}
         \end{column}
         \begin{column}{0.32\textwidth}
             \centering
-            \includegraphics[width=\linewidth, height=2.3cm, keepaspectratio]{bella_comparison_f286.png}
+            \includegraphics[width=\linewidth, height=2.1cm, keepaspectratio]{bella_comparison_f286.png}
             \vspace{0.05cm}
             
             \scriptsize \textit{Frame 286 (9.5s): Smile \& Squint}
         \end{column}
         \begin{column}{0.32\textwidth}
             \centering
-            \includegraphics[width=\linewidth, height=2.3cm, keepaspectratio]{bella_comparison_f20.png}
+            \includegraphics[width=\linewidth, height=2.1cm, keepaspectratio]{bella_comparison_f20.png}
             \vspace{0.05cm}
             
-            \scriptsize \textit{Frame 20 (0.7s): Mouth Opening \& Speech}
+            \scriptsize \textit{Frame 20 (0.7s): Mouth Opening}
         \end{column}
     \end{columns}
 
-    \vspace{0.3cm}
+    \vspace{0.15cm}
     
     \begin{block}{Demo Video Link}
-        \small
+        \scriptsize
         \begin{itemize}
             \item \textbf{3$\times$3 Multi-Subject Comparison Video (All Members):} \href{https://www.youtube.com/shorts/1zLsU1j765I}{\underline{\textcolor{primaryNavy}{Watch Online (External Link)}}}
         \end{itemize}

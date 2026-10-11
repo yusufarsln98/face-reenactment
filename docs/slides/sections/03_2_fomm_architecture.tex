@@ -2,19 +2,20 @@
 \begin{frame}{First Order Motion Model (Siarohin et al., NeurIPS 2019)}
     \begin{columns}[c]
         \begin{column}{0.54\textwidth}
+            \small
             \textbf{Core Innovations}
             \begin{itemize}
-                \item \textbf{No Pretrained Landmarks:} Doesn't need 68 facial landmark detectors or 3D models (3DMM).
-                \item \textbf{Self-Supervised:} Learns keypoints automatically from raw video pairs.
-                \item \textbf{Appearance / Motion Decoupling:} Appearance comes from source $S$; motion comes from driving $D$.
-                \item \textbf{Generalizes Across Domains:} Works on human faces, bodies (Tai-Chi), and animals.
+                \item \textbf{No Pretrained Landmarks:} Doesn't need 68 landmark detectors or 3D models (3DMM).
+                \item \textbf{Self-Supervised:} Discovers keypoints automatically from raw video pairs.
+                \item \textbf{Decoupled Repr.:} Appearance from source $S$; motion from driving $D$.
+                \item \textbf{Domain Agnostic:} Works on human faces, bodies (Tai-Chi), and animals.
             \end{itemize}
         \end{column}
 
         \begin{column}{0.44\textwidth}
             \centering
-            \includegraphics[width=\linewidth, height=3.8cm, keepaspectratio]{fomm_teaser.png}
-            \vspace{0.15cm}
+            \includegraphics[width=\linewidth, height=3.5cm, keepaspectratio]{fomm_teaser.png}
+            \vspace{0.1cm}
             
             \scriptsize \textit{FOMM teaser: VoxCeleb, Tai-Chi, Fashion (Siarohin et al., 2019).}
         \end{column}
@@ -24,7 +25,8 @@
 % --- Slide 2: Motion Representation: 0th vs 1st Order ---
 \begin{frame}{Motion Representation: 0th-Order vs. 1st-Order Motion}
     \begin{columns}[c]
-        \begin{column}{0.48\textwidth}
+        \begin{column}{0.50\textwidth}
+            \small
             \textbf{How Motion is Represented}
             \begin{itemize}
                 \item \textbf{0th-Order (Translation Only):}
@@ -32,18 +34,18 @@
                     \item Moves points in 2D space $(x, y)$.
                     \item Cannot stretch skin; movement looks stiff and robotic.
                 \end{itemize}
-                \vspace{0.25cm}
+                \vspace{0.15cm}
                 \item \textbf{1st-Order (FOMM / Local Affine):}
                 \begin{itemize}
-                    \item Estimates a Jacobian matrix around each point via first-order Taylor expansion.
-                    \item Captures rotation (head tilts), scale (mouth opening), and shear (skin stretch).
+                    \item Estimates a Jacobian matrix around each point.
+                    \item Captures rotation, scale (open mouth), and shear (skin stretch).
                 \end{itemize}
             \end{itemize}
         \end{column}
 
-        \begin{column}{0.50\textwidth}
+        \begin{column}{0.48\textwidth}
             \centering
-            \includegraphics[width=\linewidth, height=4.2cm, keepaspectratio]{diagram_facial_motion_order.png}
+            \includegraphics[width=\linewidth, height=3.8cm, keepaspectratio]{diagram_facial_motion_order.png}
         \end{column}
     \end{columns}
 \end{frame}
@@ -51,10 +53,10 @@
 % --- Slide 3: The FOMM Pipeline & Core Components ---
 \begin{frame}{FOMM Architectural Pipeline}
     \begin{center}
-        \includegraphics[width=0.96\linewidth, height=3.0cm, keepaspectratio]{diagram_fomm_pipeline.png}
+        \includegraphics[width=0.96\linewidth, height=2.6cm, keepaspectratio]{diagram_fomm_pipeline.png}
     \end{center}
 
-    \vspace{0.15cm}
+    \vspace{0.1cm}
 
     \begin{columns}[T]
         \begin{column}{0.32\textwidth}
@@ -64,12 +66,12 @@
         \end{column}
         \begin{column}{0.32\textwidth}
             \begin{block}{2. Dense Motion Network}
-                \scriptsize Combines sparse keypoint motions into dense optical flow ($T$) and an occlusion mask ($O$).
+                \scriptsize Combines sparse keypoint motions into dense optical flow ($T$) and mask ($O$).
             \end{block}
         \end{column}
         \begin{column}{0.32\textwidth}
             \begin{block}{3. Inpainting Generator}
-                \scriptsize Warps source features using flow $T$ and synthesizes occluded regions ($O \approx 0$).
+                \scriptsize Warps source features using flow $T$ and synthesizes occluded areas ($O \approx 0$).
             \end{block}
         \end{column}
     \end{columns}

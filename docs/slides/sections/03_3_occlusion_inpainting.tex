@@ -1,27 +1,28 @@
 % --- Slide 1: Self-Occlusion & The Need for Inpainting ---
 \begin{frame}{Self-Occlusion \& Inpainting Mechanism}
     \begin{columns}[c]
-        \begin{column}{0.48\textwidth}
+        \begin{column}{0.50\textwidth}
             \begin{block}{The Occlusion Problem}
                 \small
                 \begin{itemize}
-                    \item Head rotations or mouth opening reveal regions hidden in source portrait $S$ (teeth, tongue, cheeks).
-                    \item Pure warping has no source pixels to sample from $\to$ results in severe stretching or black holes.
+                    \item Turning head or opening mouth reveals unseen areas in $S$ (teeth, tongue).
+                    \item Pure warping has no source pixels $\to$ causes stretching or black holes.
                 \end{itemize}
             \end{block}
 
+            \vspace{-0.1cm}
             \begin{block}{The FOMM Solution}
                 \small
                 \begin{itemize}
-                    \item \textbf{Occlusion Mask ($O$):} Detects missing or disoccluded pixels ($O \approx 0$).
-                    \item \textbf{Inpainting:} Generator fills missing pixels using facial patterns learned during training.
+                    \item \textbf{Occlusion Mask ($O$):} Flags missing pixels ($O \approx 0$).
+                    \item \textbf{Inpainting:} Generator fills missing pixels using learned facial priors.
                 \end{itemize}
             \end{block}
         \end{column}
 
-        \begin{column}{0.50\textwidth}
+        \begin{column}{0.48\textwidth}
             \centering
-            \includegraphics[width=\linewidth, height=4.2cm, keepaspectratio]{diagram_occlusion_inpainting.png}
+            \includegraphics[width=\linewidth, height=3.8cm, keepaspectratio]{diagram_occlusion_inpainting.png}
         \end{column}
     \end{columns}
 \end{frame}
@@ -32,9 +33,9 @@
         \small \textbf{5 Key Stages Extracted from Our Local Inference Run}
     \end{center}
     
-    \vspace{-0.1cm}
+    \vspace{-0.15cm}
     \begin{center}
-        \includegraphics[width=0.96\linewidth, height=3.5cm, keepaspectratio]{ara_asamalar_gorsellestirme.png}
+        \includegraphics[width=0.96\linewidth, height=3.1cm, keepaspectratio]{ara_asamalar_gorsellestirme.png}
     \end{center}
     \vspace{-0.1cm}
     

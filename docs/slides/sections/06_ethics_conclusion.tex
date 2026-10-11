@@ -7,8 +7,8 @@
             \begin{block}{Societal Risks}
                 \small
                 \begin{itemize}
-                    \item \textbf{Unauthorized Impersonation:} Reenacting individuals from a single photo without consent.
-                    \item \textbf{Misinformation:} Generating fabricated audiovisual material to deceive public opinion.
+                    \item \textbf{Impersonation:} Reenacting individuals without their consent.
+                    \item \textbf{Misinformation:} Generating fabricated videos to deceive the public.
                 \end{itemize}
             \end{block}
         \end{column}
@@ -17,9 +17,9 @@
             \begin{block}{Detection Strategies}
                 \small
                 \begin{itemize}
-                    \item \textbf{Biological signals:} Unnatural blinking dynamics and subtle facial blood-flow pulses (rPPG).
-                    \item \textbf{Frequency artifacts:} High-frequency spectral artifacts from neural upsampling layers.
-                    \item \textbf{Watermarking / C2PA:} Cryptographic metadata and provenance tracking embedded at capture.
+                    \item \textbf{Biological signals:} Unnatural blinking and pulse signals (rPPG).
+                    \item \textbf{Frequency artifacts:} High-frequency noise from neural upsampling.
+                    \item \textbf{Watermarking / C2PA:} Cryptographic metadata embedded at capture.
                 \end{itemize}
             \end{block}
         \end{column}
@@ -30,27 +30,28 @@
 \begin{frame}{Conclusion}
     \begin{columns}[T]
         \begin{column}{0.55\textwidth}
+            \small
             \textbf{Summary}
             \begin{itemize}
-                \item FOMM animates single portraits using 10 unsupervised keypoints and local Jacobian transformations.
-                \item Eliminates dependency on manual facial landmarks or pre-built 3D face models.
-                \item Inpainting handles disocclusions, but rare traits (e.g., dental braces) vanish due to dataset bias and lack of temporal memory.
+                \item Animates portraits using 10 unsupervised keypoints and Jacobians.
+                \item Eliminates need for landmark detectors or 3D face models.
+                \item Inpainting handles disocclusion, but rare features (braces) vanish due to dataset bias.
             \end{itemize}
         \end{column}
 
         \begin{column}{0.40\textwidth}
             \begin{block}{Project Repository}
                 \centering
-                \small
+                \scriptsize
                 Code, inputs, and outputs:\\
-                \vspace{0.2cm}
-                \footnotesize \url{https://github.com/yusufarslan/face-reenactment}
+                \vspace{0.15cm}
+                \tiny \url{https://github.com/yusufarslan/face-reenactment}
             \end{block}
         \end{column}
     \end{columns}
 
-    \vspace{0.5cm}
+    \vspace{0.25cm}
     \begin{center}
-        \Large \textbf{Questions \& Discussion}
+        \large \textbf{Questions \& Discussion}
     \end{center}
 \end{frame}
