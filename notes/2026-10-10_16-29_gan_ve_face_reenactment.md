@@ -3,7 +3,7 @@
 
 ## 1. Standart GAN: Ressam ve Uzman Analojisi
 
-![Standart GAN Mimarisi](assets/diagram_standard_gan.svg)
+![Standart GAN Mimarisi](assets/diagram_standard_gan.png)
 
 - **Generator ($G$):** Hayalinden sıfırdan sahte portre çizen bir ressamdır.
 - **Discriminator ($D$):** Tabloya bakıp "Bu gerçek insan mı yoksa çakma mı?" diyen sanat uzmanıdır.

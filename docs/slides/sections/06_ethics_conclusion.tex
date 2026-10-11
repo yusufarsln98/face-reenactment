@@ -1,0 +1,56 @@
+\section{Ethics \& Conclusion}
+
+% --- Slide 1: Ethics & Detection ---
+\begin{frame}{Ethics \& DeepFake Detection}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \begin{block}{Risks}
+                \small
+                \begin{itemize}
+                    \item \textbf{Impersonation:} Reenacting individuals without their knowledge or consent.
+                    \item \textbf{Misinformation:} Generating fabricated video statements.
+                \end{itemize}
+            \end{block}
+        \end{column}
+
+        \begin{column}{0.48\textwidth}
+            \begin{block}{Detection Methods}
+                \small
+                \begin{itemize}
+                    \item \textbf{Biological signals:} Heartbeat blood flow (rPPG), unnatural blinking patterns.
+                    \item \textbf{Frequency artifacts:} High-frequency noise left by GAN upsampling layers.
+                    \item \textbf{Watermarking / C2PA:} Cryptographic metadata embedded in original camera recordings.
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- Slide 2: Conclusion & Q&A ---
+\begin{frame}{Conclusion}
+    \begin{columns}[T]
+        \begin{column}{0.55\textwidth}
+            \textbf{Summary}
+            \begin{itemize}
+                \item FOMM successfully animates single portraits using 10 unsupervised keypoints and Jacobians.
+                \item Eliminates need for landmark detectors or 3D face models.
+                \item Self-occlusions are handled by inpainting, but rare features (braces) vanish due to lack of temporal memory.
+            \end{itemize}
+        \end{column}
+
+        \begin{column}{0.40\textwidth}
+            \begin{block}{Project Repo}
+                \centering
+                \small
+                Code, inputs, and outputs:\\
+                \vspace{0.2cm}
+                \footnotesize \url{https://github.com/yusufarslan/face-reenactment}
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \vspace{0.5cm}
+    \begin{center}
+        \Large \textbf{Questions \& Discussion}
+    \end{center}
+\end{frame}

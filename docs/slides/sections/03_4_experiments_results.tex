@@ -1,0 +1,84 @@
+% --- Slide 1: Inference Pipeline Pseudocode ---
+\begin{frame}[fragile]{Inference Pipeline: Python Pseudocode}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \begin{block}{Frame-by-Frame Execution}
+                \scriptsize
+\begin{verbatim}
+# 1. Reference keypoints from source portrait
+kp_source = keypoint_detector(source_image)
+
+# 2. Iterate over driving video
+for frame_d in driving_video:
+    # Blackbox 1: Motion tracking
+    kp_driving = keypoint_detector(frame_d)
+
+    # Blackbox 2: Dense motion estimation
+    flow, occ = dense_motion_net(kp_source, kp_driving)
+
+    # Blackbox 3: Warping & Inpainting
+    out_frame = generator(source_image, flow, occ)
+
+    yield out_frame
+\end{verbatim}
+            \end{block}
+        \end{column}
+
+        \begin{column}{0.41\textwidth}
+            \textbf{Core Module Functions}
+            \begin{itemize}
+                \small
+                \item \texttt{keypoint\_detector}: Extracts 10 self-supervised reference points.
+                \item \texttt{dense\_motion\_net}: Converts sparse point shifts into optical flow and an occlusion mask.
+                \item \texttt{generator}: Warps source pixels and inpaints missing areas (mouth/teeth).
+            \end{itemize}
+
+            \vspace{0.2cm}
+            \begin{block}{Architectural Property}
+                \scriptsize \textbf{No Recurrence:} The loop carries no hidden state across frames ($t \to t+1$).
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- Slide 2: Side-by-Side Results & External Video Links ---
+\begin{frame}{Results: Bella Poarch Benchmark}
+    \begin{center}
+        \small \textbf{[Source $\mid$ Driving $\mid$ Synthesized Result]}
+    \end{center}
+
+    \vspace{0.1cm}
+    \begin{columns}[c]
+        \begin{column}{0.32\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=2.3cm, keepaspectratio]{bella_comparison_f30.png}
+            \vspace{0.05cm}
+            
+            \scriptsize \textit{Frame 30 (1s): Head Tilt}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=2.3cm, keepaspectratio]{bella_comparison_f150.png}
+            \vspace{0.05cm}
+            
+            \scriptsize \textit{Frame 150 (5s): Squint \& Smile}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=2.3cm, keepaspectratio]{bella_comparison_f300.png}
+            \vspace{0.05cm}
+            
+            \scriptsize \textit{Frame 300 (10s): Open Mouth}
+        \end{column}
+    \end{columns}
+
+    \vspace{0.3cm}
+    
+    \begin{block}{Demo Video Links}
+        \small
+        \begin{itemize}
+            \item \textbf{Side-by-Side Comparison Video:} \href{https://YOUR-EXTERNAL-VIDEO-LINK-HERE}{\underline{Watch Online (External Link)}}
+            \item \textbf{Reenacted Output Only:} \href{https://YOUR-EXTERNAL-VIDEO-LINK-HERE}{\underline{Watch Online (External Link)}}
+        \end{itemize}
+    \end{block}
+\end{frame}

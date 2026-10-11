@@ -1,0 +1,83 @@
+% --- Slide 1: Hypothesis & Setup for Edge Case ---
+\begin{frame}{Failure Mode Experiment: Dental Braces}
+    \begin{columns}[T]
+        \begin{column}{0.50\textwidth}
+            \begin{block}{Experiment Setup}
+                \small
+                \begin{itemize}
+                    \item \textbf{Test Idea:} Test how FOMM handles rare facial features not present in training data.
+                    \item \textbf{Subject:} Source person with metallic dental braces on teeth (\texttt{bella\_poarch\_dis\_teli}).
+                    \item \textbf{Driving Motion:} Person smiles, closes mouth, and then re-opens mouth wide.
+                \end{itemize}
+            \end{block}
+        \end{column}
+
+        \begin{column}{0.48\textwidth}
+            \begin{block}{Hypothesis}
+                \small
+                \begin{itemize}
+                    \item VoxCeleb training data has almost no people with dental braces.
+                    \item While mouth is open, warping should keep the brackets.
+                    \item Once mouth closes and re-opens, inpainting must generate teeth from scratch.
+                    \item \textbf{Prediction:} The model will hallucinate generic white teeth and erase the braces.
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- Slide 2: Visual Evidence of Failure Mode (3x3 Grid) ---
+\begin{frame}{Failure Mode: Vanishing Dental Braces}
+    \begin{columns}[c]
+        \begin{column}{0.54\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=5.2cm, keepaspectratio]{dis_teli_kaybolma_analizi.png}
+            \vspace{0.05cm}
+            
+            \scriptsize \textit{Frame 10 (top), Frame 195 (middle), Frame 288 (bottom).}
+        \end{column}
+
+        \begin{column}{0.44\textwidth}
+            \textbf{Observation Across Frames:}
+            \begin{itemize}
+                \item \textbf{Frame 10 (0.3s):} Braces are preserved cleanly by feature warping.
+                \item \textbf{Frame 195 (6.5s):} Mouth closes; brackets disappear behind lips.
+                \item \textbf{Frame 288 (9.6s) -- Failure:} Mouth re-opens, and \textbf{braces are gone}.
+                \item Generator draws standard white teeth from its learned training prior.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- Slide 3: Root Cause Analysis & Video Links ---
+\begin{frame}{Root Cause: Why Did It Fail?}
+    \begin{columns}[T]
+        \begin{column}{0.48\textwidth}
+            \begin{block}{Technical Reasons}
+                \begin{enumerate}
+                    \item \textbf{Zero Temporal Memory:} FOMM runs frame-by-frame. No hidden state or memory buffer to remember past frames.
+                    \item \textbf{Dataset Bias in Inpainting:} When occlusion mask flags $O \approx 0$, generator samples from VoxCeleb average (normal teeth without braces).
+                \end{enumerate}
+            \end{block}
+        \end{column}
+
+        \begin{column}{0.48\textwidth}
+            \begin{block}{Main Takeaway}
+                \begin{itemize}
+                    \item Warping retains unique personal details from source image.
+                    \item Inpainting forces output toward dataset averages.
+                    \item Fix: Needs temporal attention or recurrent memory to cache identity traits.
+                \end{itemize}
+            \end{block}
+
+            \vspace{0.15cm}
+            \begin{block}{Braces Experiment Videos}
+                \small
+                \begin{itemize}
+                    \item \textbf{Side-by-Side Video:} \href{https://YOUR-EXTERNAL-VIDEO-LINK-HERE}{\underline{\textcolor{primaryNavy}{Watch Online (External Link)}}}
+                    \item \textbf{Reenacted Result:} \href{https://YOUR-EXTERNAL-VIDEO-LINK-HERE}{\underline{\textcolor{primaryNavy}{Watch Online (External Link)}}}
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}

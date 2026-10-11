@@ -15,7 +15,7 @@ Model, yüzdeki kritik hareket noktalarını (Keypoint) tespit ederken iki bilgi
 
 ## 3. Sistem Akışı (Pipeline)
 
-![FOMM Pipeline Akışı](assets/diagram_fomm_pipeline.svg)
+![FOMM Pipeline Akışı](assets/diagram_fomm_pipeline.png)
 
 ## 4. Modüllerin Görevleri
 

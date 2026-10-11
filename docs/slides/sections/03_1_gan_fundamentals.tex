@@ -1,0 +1,62 @@
+\section{Method 2: GANs \& FOMM}
+
+% --- Slide 1: Standard GAN ---
+\begin{frame}{Standard GAN Architecture}
+    \begin{columns}[c]
+        \begin{column}{0.48\textwidth}
+            \textbf{How GANs Work (Goodfellow et al., 2014)}
+            \begin{itemize}
+                \item Two neural networks competing against each other:
+                \item \textbf{Generator ($G$):} Takes random noise and learns to paint realistic face images.
+                \item \textbf{Discriminator ($D$):} Evaluates images and decides if they are real or fake.
+                \item \textbf{Training loop:} The generator gets feedback from the discriminator and gradually learns photorealistic textures.
+            \end{itemize}
+        \end{column}
+
+        \begin{column}{0.50\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=4.2cm, keepaspectratio]{diagram_standard_gan.png}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- Slide 2: Why Standard GANs Fail ---
+\begin{frame}{The Control Problem in Vanilla GANs}
+    \begin{columns}[T]
+        \begin{column}{0.50\textwidth}
+            \begin{block}{Why Unconditional GAN Fails}
+                \small
+                \begin{itemize}
+                    \item Produces arbitrary faces from noise $\mathbf{z}$.
+                    \item Identity, pose, and emotion are entangled in $\mathbf{z}$.
+                    \item Cannot say: \textit{"keep Person A, copy Person B's expression"}.
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{What Reenactment Needs}
+                \small
+                \begin{itemize}
+                    \item Keep source identity fixed: appearance from $S$.
+                    \item Motion driven externally: dynamics from $D$.
+                \end{itemize}
+            \end{block}
+        \end{column}
+
+        \begin{column}{0.48\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=2.4cm, keepaspectratio]{ressam_dedektif_analoji.png}
+            
+            \vspace{0.15cm}
+            \begin{block}{Analogy}
+                \scriptsize
+                \begin{itemize}
+                    \item \textbf{Driving Video ($D$)} $\to$ Live actor posing
+                    \item \textbf{Keypoint Detector} $\to$ Sketch artist drafting motion
+                    \item \textbf{Source Image ($S$)} $\to$ Portrait being painted
+                    \item \textbf{Generator} $\to$ Painter applying textures
+                    \item \textbf{Discriminator} $\to$ Art critic checking realism
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}

@@ -1,0 +1,133 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+% -------------------------------------------------------------
+% Academic Presentation Styling (Clean, Minimal, Professional)
+% -------------------------------------------------------------
+\usetheme{Boadilla}
+\usecolortheme{default}
+
+% Disable distracting navigation symbols
+\setbeamertemplate{navigation symbols}{}
+
+% Flat, unshadowed academic blocks
+\setbeamertemplate{blocks}[rounded=false, shadow=false]
+\setbeamertemplate{items}[circle]
+
+% Professional Monochrome Academic Palette (Clean Grayscale & Charcoal)
+\definecolor{primaryNavy}{RGB}{24, 24, 27}
+\definecolor{secondaryNavy}{RGB}{63, 63, 70}
+\definecolor{darkCharcoal}{RGB}{24, 24, 27}
+\definecolor{mutedGray}{RGB}{248, 250, 252}
+\definecolor{ruleGray}{RGB}{226, 232, 240}
+\definecolor{alertDarkRed}{RGB}{63, 63, 70}
+\definecolor{accentTeal}{RGB}{39, 39, 42}
+
+% Beamer Element Colors
+\setbeamercolor{structure}{fg=primaryNavy}
+\setbeamercolor{frametitle}{fg=primaryNavy, bg=white}
+\setbeamercolor{title}{fg=primaryNavy}
+\setbeamercolor{subtitle}{fg=secondaryNavy}
+\setbeamercolor{author}{fg=darkCharcoal}
+\setbeamercolor{institute}{fg=darkCharcoal!80}
+\setbeamercolor{date}{fg=darkCharcoal!80}
+
+% Footline & Infolines (Subtle, uncluttered)
+\setbeamercolor{author in head/foot}{fg=white, bg=primaryNavy}
+\setbeamercolor{title in head/foot}{fg=white, bg=secondaryNavy}
+\setbeamercolor{date in head/foot}{fg=white, bg=primaryNavy}
+
+% Academic Block Styling
+\setbeamercolor{block title}{fg=white, bg=primaryNavy}
+\setbeamercolor{block body}{fg=darkCharcoal, bg=mutedGray}
+\setbeamercolor{block title alerted}{fg=white, bg=alertDarkRed}
+\setbeamercolor{block body alerted}{fg=darkCharcoal, bg=alertDarkRed!8}
+\setbeamercolor{block title example}{fg=white, bg=secondaryNavy}
+\setbeamercolor{block body example}{fg=darkCharcoal, bg=secondaryNavy!8}
+
+% Frame Title Customization: Clean Title + Thin Divider Rule
+\setbeamertemplate{frametitle}{%
+    \vspace{0.25cm}%
+    \usebeamerfont{frametitle}\insertframetitle%
+    \par\vspace{0.15cm}%
+    {\color{ruleGray}\hrule height 0.6pt}%
+    \vspace{0.1cm}%
+}
+
+% Essential Packages
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds}
+
+% Graphics Path
+\graphicspath{{figures/}{../figures/}}
+
+% Clean Hyperlinks
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primaryNavy,
+    urlcolor=primaryNavy,
+    citecolor=primaryNavy
+}
+
+% Presentation Metadata
+\title[Face Reenactment (FOMM)]{Exploring DeepFakes: Face Reenactment}
+\subtitle{Comparative Architecture Analysis, FOMM \& Failure Mode Experiments}
+\author[Arslan et al.]{Yusuf Arslan \and [Group Member 1] \and [Group Member 2]}
+\institute[Dept. of Computer Science]{Deep Learning \& Computer Vision}
+\date{\today}
+
+\begin{document}
+
+% -------------------------------------------------------------
+% Title Slide
+% -------------------------------------------------------------
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+
+% -------------------------------------------------------------
+% Outline Slide
+% -------------------------------------------------------------
+\begin{frame}{Outline}
+    \tableofcontents[hideallsubsections]
+\end{frame}
+
+% -------------------------------------------------------------
+% 1. Introduction
+% -------------------------------------------------------------
+\input{sections/01_introduction.tex}
+
+% -------------------------------------------------------------
+% 2. Method 1: Autoencoders (Teammate Placeholder)
+% -------------------------------------------------------------
+\input{sections/02_autoencoders.tex}
+
+% -------------------------------------------------------------
+% 3. Method 2: GANs & First Order Motion Model (Detailed)
+% -------------------------------------------------------------
+\input{sections/03_1_gan_fundamentals.tex}
+\input{sections/03_2_fomm_architecture.tex}
+\input{sections/03_3_occlusion_inpainting.tex}
+\input{sections/03_4_experiments_results.tex}
+\input{sections/03_5_failure_mode_analysis.tex}
+
+% -------------------------------------------------------------
+% 4. Method 3: Diffusion Models (Teammate Placeholder)
+% -------------------------------------------------------------
+\input{sections/04_diffusion.tex}
+
+% -------------------------------------------------------------
+% 5. Comparative Analysis (Team Synthesis Placeholder)
+% -------------------------------------------------------------
+\input{sections/05_comparison.tex}
+
+% -------------------------------------------------------------
+% 6. Ethics & Conclusion
+% -------------------------------------------------------------
+\input{sections/06_ethics_conclusion.tex}
+
+\end{document}

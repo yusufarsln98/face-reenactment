@@ -13,7 +13,7 @@ Dense Motion Network, pikselleri sadece kaydırmaz; her bölge için bir **Occlu
 
 ## 3. Aşama 2: Eksik Alanları Çizme (Inpainting)
 
-![Occlusion ve Inpainting Akışı](assets/diagram_occlusion_inpainting.svg)
+![Occlusion ve Inpainting Akışı](assets/diagram_occlusion_inpainting.png)
 
 Generator, eğitim sırasında milyonlarca yüz videosundan insan anatomisini öğrenmiştir:
 1. Deliğin büyüklüğünü ve açısını inceler.
