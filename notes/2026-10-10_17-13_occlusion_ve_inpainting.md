@@ -21,6 +21,6 @@ Generator, eğitim sırasında milyonlarca yüz videosundan insan anatomisini ö
 
 ## 4. Hata Durumları (Failure Modes)
 
-- **Kişiye Özel Detaylar:** Model kaynak fotoğrafta göremediği detayları (diş teli, kırık diş) bilemez; ortalama standart bir diş üretir.
+- **Kişiye Özel Detaylar:** Kaynakta kapalı olan veya aşırı deformasyon sebebiyle inpainting'e aktarılan bölgelerde model nadir detayları (diş teli, altın diş vb.) koruyamaz; eğitim setinin ortalamasından standart doku üretir.
 - **Aşırı Açı Değişimi:** Kafa $45^\circ$'den fazla döndüğünde boşluk çok büyür; model alanı tam uyduramaz ve bulanık lekeler (artifacts) oluşur.
 

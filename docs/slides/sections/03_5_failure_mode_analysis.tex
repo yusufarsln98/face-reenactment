@@ -5,9 +5,9 @@
             \begin{block}{Experiment Setup}
                 \small
                 \begin{itemize}
-                    \item \textbf{Test Idea:} Test how FOMM handles rare facial features not present in training data.
-                    \item \textbf{Subject:} Source person with metallic dental braces on teeth (\texttt{bella\_poarch\_dis\_teli}).
-                    \item \textbf{Driving Motion:} Person smiles, closes mouth, and then re-opens mouth wide.
+                    \item \textbf{Test Idea:} How does FOMM handle rare facial features absent from training data?
+                    \item \textbf{Subject:} Source portrait with metallic dental braces (\texttt{bella\_poarch\_dis\_teli}).
+                    \item \textbf{Driving Motion:} Sequences from subtle head tilt to closed mouth, ending in a wide squinting smile.
                 \end{itemize}
             \end{block}
         \end{column}
@@ -16,10 +16,10 @@
             \begin{block}{Hypothesis}
                 \small
                 \begin{itemize}
-                    \item VoxCeleb training data has almost no people with dental braces.
-                    \item While mouth is open, warping should keep the brackets.
-                    \item Once mouth closes and re-opens, inpainting must generate teeth from scratch.
-                    \item \textbf{Prediction:} The model will hallucinate generic white teeth and erase the braces.
+                    \item VoxCeleb training data has virtually zero faces with dental braces.
+                    \item \textbf{Warping Regime ($O \approx 1$):} Optical flow copies real source pixels $\to$ braces preserved.
+                    \item \textbf{Inpainting Regime ($O \approx 0$):} Under extreme deformation, model flags teeth as occluded and synthesizes them.
+                    \item \textbf{Prediction:} Inpainting will sample dataset average and erase braces.
                 \end{itemize}
             \end{block}
         \end{column}
@@ -40,10 +40,10 @@
         \begin{column}{0.44\textwidth}
             \textbf{Observation Across Frames:}
             \begin{itemize}
-                \item \textbf{Frame 10 (0.3s):} Braces are preserved cleanly by feature warping.
-                \item \textbf{Frame 195 (6.5s):} Mouth closes; brackets disappear behind lips.
-                \item \textbf{Frame 288 (9.6s) -- Failure:} Mouth re-opens, and \textbf{braces are gone}.
-                \item Generator draws standard white teeth from its learned training prior.
+                \item \textbf{Frame 10 (0.3s) — Warping:} Small motion offset; teeth mapped from source ($O \approx 1$). Metallic brackets intact.
+                \item \textbf{Frame 195 (6.5s) — Natural Closure:} Driving mouth closes; teeth hidden behind lips.
+                \item \textbf{Frame 288 (9.6s) — Inpainting Failure:} Wide squint/smile exceeds flow limits $\to$ mouth flagged as occluded ($O \approx 0$).
+                \item Generator draws standard white teeth from dataset prior; \textbf{braces vanish completely}.
             \end{itemize}
         \end{column}
     \end{columns}
@@ -52,21 +52,24 @@
 % --- Slide 3: Root Cause Analysis & Video Links ---
 \begin{frame}{Root Cause: Why Did It Fail?}
     \begin{columns}[T]
-        \begin{column}{0.48\textwidth}
-            \begin{block}{Technical Reasons}
+        \begin{column}{0.50\textwidth}
+            \begin{block}{Technical Causes}
+                \small
                 \begin{enumerate}
-                    \item \textbf{Zero Temporal Memory:} FOMM runs frame-by-frame. No hidden state or memory buffer to remember past frames.
-                    \item \textbf{Dataset Bias in Inpainting:} When occlusion mask flags $O \approx 0$, generator samples from VoxCeleb average (normal teeth without braces).
+                    \item \textbf{Stateless Generation:} Each frame is computed strictly from $(S, D_t)$. Frame 195 does not cause Frame 288's loss; Frame 288 fails due to its own extreme deformation mismatch.
+                    \item \textbf{Dataset Bias in Inpainting:} When $O \approx 0$, generator ignores source pixels and samples from VoxCeleb average (normal teeth).
+                    \item \textbf{Zero Identity Cache:} FOMM lacks recurrent memory to inject known identity traits into the inpainter.
                 \end{enumerate}
             \end{block}
         \end{column}
 
-        \begin{column}{0.48\textwidth}
+        \begin{column}{0.46\textwidth}
             \begin{block}{Main Takeaway}
+                \small
                 \begin{itemize}
-                    \item Warping retains unique personal details from source image.
-                    \item Inpainting forces output toward dataset averages.
-                    \item Fix: Needs temporal attention or recurrent memory to cache identity traits.
+                    \item \textbf{Warping} preserves unique personal traits.
+                    \item \textbf{Inpainting} pulls outputs toward dataset averages.
+                    \item \textbf{Architectural Fix:} Requires 3D geometry priors or persistent identity memory.
                 \end{itemize}
             \end{block}
 

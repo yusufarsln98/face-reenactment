@@ -12,11 +12,15 @@
 
 ## 3. Gözlemler ve Teknik Hata Analizi
 
-1. **Ağız Kapanma Uyuşmazlığı:** Sürüş videosunda Bella'nın ağzı kapalı olmasına rağmen, kaynak fotoğrafta çok geniş bir gülümseme olduğu için model ağzı videonun büyük kısmında tam kapatamaz; hafif açık bırakır.
-2. **Kapanıp Açılınca Telin Kaybolması (10. Saniye - F:288):**
-   - **F:0 - F:40:** İlk karelerde diş telleri ve metal braketler net olarak taşınır (Feature Warping).
-   - **F:100 - F:200:** Ağız büzülüp kapandıkça modelin deformasyon alanı değişir.
-   - **F:288 (10. Saniyenin Başı):** Ağız yeniden belirgin şekilde açılıp gülümsediğinde **diş telleri tamamen yok olur**. Metal braketler silinmiş, yerini düz beyaz diş dokusu almıştır.
+1. **Kare Bağımsızlığı (Stateless Pipeline):** FOMM kareler arasında yinelemeli (recurrent) bellek taşımaz. Her kare yalnızca kaynak görsel ($S$) ve o anki sürüş karesi ($D_t$) ile üretilir; ara karelerde ağzın kapanması sonraki kareleri doğrudan etkilemez.
+2. **Kare Bazında Warping vs. Inpainting Farkı:**
+   - **F:10 (0.3s) — Başarılı Warping ($O \approx 1$):** Sürüş mimiği ilk kareye yakındır; dense motion network kaynak diş piksellerini hedef geometriye eşleştirebilir. Kaynaktaki gerçek pikseller taşınır ve diş telleri korunur.
+   - **F:195 (6.5s) — Ağız Kapanması:** Sürüş karesinde dudaklar kapandığı için dişler doğal olarak görünmez.
+   - **F:288 (9.6s) — Inpainting Devreye Girişi ($O \approx 0$):** Sürüş yüzünde aşırı ve farklı açılı bir gülümseme oluşur. Model kaynak ağız geometrisini bu aşırı deformasyona eşleştiremeyince ağız içini eksik alan ($O \approx 0$) olarak maskeler.
+3. **Diş Telinin Silinme Nedeni (Dataset Bias):**
+   - Occlusion mask $O \approx 0$ olduğunda kaynak pikseller terk edilir; Generator ağız içini sıfırdan çizer (*Inpainting*).
+   - Eğitim seti (VoxCeleb) diş telli yüz içermediği için Generator'ın ön-bilgisi (prior) standart beyaz diş üretir ve telleri yok eder.
 
-## 4. Rapor İçin Çıkarım (Failure Mode Sebebi)
-FOMM kareler arası hafızaya sahip değildir. Occlusion mask yeni açılan ağız bölgesini "eksik veri" olarak işaretlediğinde, Generator veri setindeki genel yüz ön-bilgisine (prior bias) başvurur ve teli unutup standart diş çizer (**Inpainting Artifact**).
+## 4. Rapor İçin Çıkarım (Teknik Sonuç)
+- **Warping** kaynaktaki nadir kimlik detaylarını korurken, **Inpainting** çıktıyı eğitim setinin ortalamasına zorlar.
+- FOMM'da zamansal bellek (temporal memory) veya kimlik önbelleği (identity cache) bulunmadığı için, inpainting tetiklendiği her anda kaynaktaki nadir kişisel detaylar kaybolur.
