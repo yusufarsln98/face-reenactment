@@ -21,7 +21,8 @@ from skimage.draw import disk
 from PIL import Image, ImageDraw, ImageFont
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FOMM_DIR = os.path.join(BASE_DIR, 'fomm')
+ROOT_DIR = os.path.dirname(BASE_DIR)
+FOMM_DIR = BASE_DIR
 sys.path.insert(0, FOMM_DIR)
 
 from demo import load_checkpoints
@@ -153,7 +154,7 @@ def main():
         
     # Save outputs
     out_paths = [
-        os.path.join(BASE_DIR, 'docs', 'slides', 'figures', 'ara_asamalar_gorsellestirme.png'),
+        os.path.join(ROOT_DIR, 'docs', 'slides', 'figures', 'ara_asamalar_gorsellestirme.png'),
         os.path.join(BASE_DIR, 'notes', 'assets', 'ara_asamalar_gorsellestirme.png')
     ]
     for op in out_paths:

@@ -1,87 +1,163 @@
-import matplotlib
+#!/usr/bin/env python3
+"""
+Face Reenactment (FOMM) Pipeline Runner
+Tek ve standart Python aracı.
 
-matplotlib.use('Agg')
+Kullanım:
+  python run.py bella_poarch
+  python run.py --all
+"""
 
-import os, sys
-import yaml
-from argparse import ArgumentParser
-from time import gmtime, strftime
-from shutil import copy
+import os
+import sys
 
-from frames_dataset import FramesDataset
+# 1. Sanal ortamı (fomm_env) otomatik olarak devreye al
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+VENV_DIR = os.path.join(BASE_DIR, 'fomm_env')
+VENV_PYTHON = os.path.join(VENV_DIR, 'bin', 'python')
 
-from modules.generator import OcclusionAwareGenerator
-from modules.discriminator import MultiScaleDiscriminator
-from modules.keypoint_detector import KPDetector
+if os.path.exists(VENV_PYTHON) and sys.prefix != VENV_DIR:
+    os.execv(VENV_PYTHON, [VENV_PYTHON] + sys.argv)
 
+# 2. Ortam ve uyarı ayarları
+os.environ['MPLCONFIGDIR'] = os.environ.get('MPLCONFIGDIR', '/tmp/matplotlib_cache')
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings('ignore', category=DeprecationWarning)
+
+# 3. FOMM modüllerini içe aktar
+FOMM_DIR = BASE_DIR
+if FOMM_DIR not in sys.path:
+    sys.path.insert(0, FOMM_DIR)
+
+import argparse
+import numpy as np
+import imageio
+from skimage.transform import resize
+from skimage import img_as_ubyte
 import torch
 
-from train import train
-from reconstruction import reconstruction
-from animate import animate
+from demo import load_checkpoints, make_animation
 
-if __name__ == "__main__":
-    
-    if sys.version_info[0] < 3:
-        raise Exception("You must use Python 3 or higher. Recommended version is Python 3.7")
 
-    parser = ArgumentParser()
-    parser.add_argument("--config", required=True, help="path to config")
-    parser.add_argument("--mode", default="train", choices=["train", "reconstruction", "animate"])
-    parser.add_argument("--log_dir", default='log', help="path to log into")
-    parser.add_argument("--checkpoint", default=None, help="path to checkpoint to restore")
-    parser.add_argument("--device_ids", default="0", type=lambda x: list(map(int, x.split(','))),
-                        help="Names of the devices comma separated.")
-    parser.add_argument("--verbose", dest="verbose", action="store_true", help="Print model architecture")
-    parser.set_defaults(verbose=False)
+def generate_side_by_side(source_img, driving_frames, pred_frames):
+    """
+    [Source | Driving | Reenacted] yan yana karşılaştırma videosu üretir.
+    """
+    combined_frames = []
+    h, w, c = pred_frames[0].shape
+    src_resized = resize(source_img, (h, w))[..., :3]
 
-    opt = parser.parse_args()
-    with open(opt.config) as f:
-        config = yaml.load(f)
+    for d_frame, p_frame in zip(driving_frames, pred_frames):
+        d_resized = resize(d_frame, (h, w))[..., :3]
+        combined = np.concatenate([src_resized, d_resized, p_frame], axis=1)
+        combined_frames.append(img_as_ubyte(combined))
 
-    if opt.checkpoint is not None:
-        log_dir = os.path.join(*os.path.split(opt.checkpoint)[:-1])
+    return combined_frames
+
+
+def process_pair(folder_name):
+    """Belirtilen girdi klasörü için hem normal hem karşılaştırma videosu üretir."""
+    inputs_dir = os.path.join(BASE_DIR, 'inputs', folder_name)
+    outputs_dir = os.path.join(BASE_DIR, 'outputs', folder_name)
+
+    source_path = os.path.join(inputs_dir, 'source.png')
+    driving_path = os.path.join(inputs_dir, 'driving.mp4')
+    checkpoint_path = os.path.join(FOMM_DIR, 'vox-cpk.pth.tar')
+    config_path = os.path.join(FOMM_DIR, 'config', 'vox-256.yaml')
+
+    if not os.path.exists(inputs_dir):
+        print(f"[!] Hata: 'inputs/{folder_name}' klasörü bulunamadı.")
+        return
+    if not os.path.exists(source_path):
+        print(f"[!] Hata: '{source_path}' bulunamadı.")
+        return
+    if not os.path.exists(driving_path):
+        print(f"[!] Hata: '{driving_path}' bulunamadı.")
+        return
+    if not os.path.exists(checkpoint_path):
+        print(f"[!] Hata: Checkpoint bulunamadı: '{checkpoint_path}'")
+        return
+
+    os.makedirs(outputs_dir, exist_ok=True)
+    print(f"\n==========================================")
+    print(f"[+] İşleniyor: {folder_name}")
+    print(f"    - Kaynak:  {source_path}")
+    print(f"    - Sürücü:  {driving_path}")
+    print(f"    - Çıktı:   {outputs_dir}")
+    print(f"==========================================")
+
+    # Verileri oku
+    source_image = imageio.imread(source_path)
+    reader = imageio.get_reader(driving_path)
+    fps = reader.get_meta_data().get('fps', 30)
+
+    driving_video = []
+    try:
+        for frame in reader:
+            driving_video.append(frame)
+    except RuntimeError:
+        pass
+    reader.close()
+
+    total_frames = len(driving_video)
+    print(f"[*] Toplam {total_frames} kare işlenecek (FPS: {fps:.2f})...")
+
+    # 256x256 boyutuna getir
+    source_resized = resize(source_image, (256, 256))[..., :3]
+    driving_resized = [resize(f, (256, 256))[..., :3] for f in driving_video]
+
+    # Model yükle (CPU)
+    print("[*] Model yükleniyor (vox-cpk.pth.tar)...")
+    generator, kp_detector = load_checkpoints(config_path=config_path, checkpoint_path=checkpoint_path, cpu=True)
+
+    # İnference
+    print("[*] Kareler üretiliyor...")
+    predictions = make_animation(
+        source_image=source_resized,
+        driving_video=driving_resized,
+        generator=generator,
+        kp_detector=kp_detector,
+        relative=True,
+        adapt_movement_scale=True,
+        cpu=True
+    )
+
+    # 1. Normal sonuç videosu
+    result_path = os.path.join(outputs_dir, 'result.mp4')
+    pred_uint8 = [img_as_ubyte(f) for f in predictions]
+    imageio.mimsave(result_path, pred_uint8, fps=fps)
+    print(f"[✓] Normal çıktı hazır: {result_path}")
+
+    # 2. Yan yana karşılaştırma videosu (Source | Driving | Result)
+    comparison_path = os.path.join(outputs_dir, 'comparison.mp4')
+    comp_frames = generate_side_by_side(source_image, driving_video, predictions)
+    imageio.mimsave(comparison_path, comp_frames, fps=fps)
+    print(f"[✓] Karşılaştırma videosu hazır: {comparison_path}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Tek ve standart Face Reenactment çalıştırıcısı")
+    parser.add_argument('target', nargs='?', default=None,
+                        help="inputs/ altındaki klasör adı (örn: bella_poarch)")
+    parser.add_argument('--all', action='store_true', help="inputs/ altındaki tüm klasörleri sırayla çalıştır")
+
+    args = parser.parse_args()
+    inputs_root = os.path.join(BASE_DIR, 'inputs')
+
+    if args.all:
+        folders = [f for f in sorted(os.listdir(inputs_root)) if os.path.isdir(os.path.join(inputs_root, f))]
+        for folder in folders:
+            process_pair(folder)
+    elif args.target:
+        process_pair(args.target)
     else:
-        log_dir = os.path.join(opt.log_dir, os.path.basename(opt.config).split('.')[0])
-        log_dir += ' ' + strftime("%d_%m_%y_%H.%M.%S", gmtime())
+        folders = [f for f in sorted(os.listdir(inputs_root)) if os.path.isdir(os.path.join(inputs_root, f))]
+        print("[*] Kullanım:")
+        print("    python run.py <klasor_adi>")
+        print("    python run.py --all")
+        print(f"\nMevcut girdi klasörleri: {folders}")
 
-    generator = OcclusionAwareGenerator(**config['model_params']['generator_params'],
-                                        **config['model_params']['common_params'])
 
-    if torch.cuda.is_available():
-        generator.to(opt.device_ids[0])
-    if opt.verbose:
-        print(generator)
-
-    discriminator = MultiScaleDiscriminator(**config['model_params']['discriminator_params'],
-                                            **config['model_params']['common_params'])
-    if torch.cuda.is_available():
-        discriminator.to(opt.device_ids[0])
-    if opt.verbose:
-        print(discriminator)
-
-    kp_detector = KPDetector(**config['model_params']['kp_detector_params'],
-                             **config['model_params']['common_params'])
-
-    if torch.cuda.is_available():
-        kp_detector.to(opt.device_ids[0])
-
-    if opt.verbose:
-        print(kp_detector)
-
-    dataset = FramesDataset(is_train=(opt.mode == 'train'), **config['dataset_params'])
-
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-    if not os.path.exists(os.path.join(log_dir, os.path.basename(opt.config))):
-        copy(opt.config, log_dir)
-
-    if opt.mode == 'train':
-        print("Training...")
-        train(config, generator, discriminator, kp_detector, opt.checkpoint, log_dir, dataset, opt.device_ids)
-    elif opt.mode == 'reconstruction':
-        print("Reconstruction...")
-        reconstruction(config, generator, kp_detector, opt.checkpoint, log_dir, dataset)
-    elif opt.mode == 'animate':
-        print("Animate...")
-        animate(config, generator, kp_detector, opt.checkpoint, log_dir, dataset)
+if __name__ == '__main__':
+    main()
