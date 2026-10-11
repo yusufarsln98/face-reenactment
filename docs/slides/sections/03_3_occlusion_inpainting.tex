@@ -1,19 +1,19 @@
 % --- Slide 1: Self-Occlusion & The Need for Inpainting ---
-\begin{frame}{Self-Occlusion \& Inpainting}
+\begin{frame}{Self-Occlusion \& Inpainting Mechanism}
     \begin{columns}[c]
         \begin{column}{0.48\textwidth}
-            \begin{block}{The Problem}
+            \begin{block}{The Occlusion Problem}
                 \small
                 \begin{itemize}
-                    \item Turning head or opening mouth reveals parts not visible in source $S$ (teeth, tongue, cheeks).
-                    \item Pure warping has no pixels to sample from $\to$ stretches or leaves black holes.
+                    \item Head rotations or mouth opening reveal regions hidden in source portrait $S$ (teeth, tongue, cheeks).
+                    \item Pure warping has no source pixels to sample from $\to$ results in severe stretching or black holes.
                 \end{itemize}
             \end{block}
 
-            \begin{block}{The Fix}
+            \begin{block}{The FOMM Solution}
                 \small
                 \begin{itemize}
-                    \item \textbf{Occlusion Mask ($O$):} Flags missing pixels ($O \approx 0$).
+                    \item \textbf{Occlusion Mask ($O$):} Detects missing or disoccluded pixels ($O \approx 0$).
                     \item \textbf{Inpainting:} Generator fills missing pixels using facial patterns learned during training.
                 \end{itemize}
             \end{block}
@@ -29,7 +29,7 @@
 % --- Slide 2: Visual Proof of Pipeline Execution (Intermediate Stages) ---
 \begin{frame}{Pipeline Verification: Intermediate Stages}
     \begin{center}
-        \small \textbf{5 Intermediate Stages Extracted During Local Inference}
+        \small \textbf{5 Key Stages Extracted from Our Local Inference Run}
     \end{center}
     
     \vspace{-0.1cm}
@@ -53,11 +53,11 @@
         \end{column}
         \begin{column}{0.19\textwidth}
             \centering \scriptsize \textbf{4. Occlusion Mask}\\
-            Dark = missing regions
+            Dark = occluded regions
         \end{column}
         \begin{column}{0.19\textwidth}
             \centering \scriptsize \textbf{5. Inpainted Result}\\
-            Synthesized output
+            Final synthesized frame
         \end{column}
     \end{columns}
 \end{frame}

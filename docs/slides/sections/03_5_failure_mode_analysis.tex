@@ -2,23 +2,23 @@
 \begin{frame}{Failure Mode Experiment: Dental Braces}
     \begin{columns}[T]
         \begin{column}{0.50\textwidth}
-            \begin{block}{Experiment Setup}
+            \begin{block}{Experimental Setup}
                 \small
                 \begin{itemize}
-                    \item \textbf{Test Idea:} How does FOMM handle rare facial features absent from training data?
+                    \item \textbf{Motivation:} Test how FOMM handles rare, out-of-distribution (OOD) facial features not present in training data.
                     \item \textbf{Subject:} Source portrait with metallic dental braces (\texttt{bella\_poarch\_dis\_teli}).
-                    \item \textbf{Driving Motion:} Sequences from subtle head tilt to closed mouth, ending in a wide squinting smile.
+                    \item \textbf{Driving Motion:} Trajectory moving from head tilt to lip closure, ending in a wide squinting smile.
                 \end{itemize}
             \end{block}
         \end{column}
 
         \begin{column}{0.48\textwidth}
-            \begin{block}{Hypothesis}
+            \begin{block}{Hypothesis \& Theoretical Basis}
                 \small
                 \begin{itemize}
-                    \item VoxCeleb training data has virtually zero faces with dental braces.
-                    \item \textbf{Warping Regime ($O \approx 1$):} Optical flow copies real source pixels $\to$ braces preserved.
-                    \item \textbf{Inpainting Regime ($O \approx 0$):} Under extreme deformation, model flags teeth as occluded and synthesizes them.
+                    \item VoxCeleb training distribution contains virtually zero faces with dental braces.
+                    \item \textbf{Warping Regime ($O \approx 1$):} Optical flow directly samples source pixels $\to$ braces will be preserved.
+                    \item \textbf{Inpainting Regime ($O \approx 0$):} Under large deformation, model marks teeth as occluded and synthesizes them.
                     \item \textbf{Prediction:} Inpainting will sample dataset average and erase braces.
                 \end{itemize}
             \end{block}
@@ -40,9 +40,9 @@
         \begin{column}{0.44\textwidth}
             \textbf{Observed Generation Regimes:}
             \begin{itemize}
-                \item \textbf{Frame 10 (0.3s) — Warping ($O \approx 1$):} Small displacement preserves optical flow correspondence; real pixels transfer metallic brackets cleanly.
-                \item \textbf{Frame 195 (6.5s) — Lip Closure:} Motion brings lips together, concealing the mouth interior.
-                \item \textbf{Frame 288 (9.6s) — Inpainting ($O \approx 0$):} Large smile deformation shifts region into inpainting mode; generator synthesizes teeth from learned weights.
+                \item \textbf{Frame 10 (0.3s) --- Warping ($O \approx 1$):} Small motion maintains optical flow correspondence; source pixels cleanly transfer metallic brackets.
+                \item \textbf{Frame 195 (6.5s) --- Natural Occlusion:} Motion drives lip closure, temporarily concealing the mouth cavity.
+                \item \textbf{Frame 288 (9.6s) --- Inpainting ($O \approx 0$):} Large smile exceeds flow tracking; generator synthesizes generic teeth from learned priors, erasing braces.
             \end{itemize}
         \end{column}
     \end{columns}
@@ -61,8 +61,8 @@
             \begin{block}{Operational Pathways}
                 \small
                 \begin{itemize}
-                    \item \textbf{Warping Path ($O \approx 1$):} Samples directly from source image $S$, preserving individual identity textures (dental braces).
-                    \item \textbf{Inpainting Path ($O \approx 0$):} Activates under high deformation; synthesizes pixels using VoxCeleb feature distributions (uniform white teeth).
+                    \item \textbf{Warping Pathway ($O \approx 1$):} Samples directly from source image $S$, preserving individual identity textures (dental braces).
+                    \item \textbf{Inpainting Pathway ($O \approx 0$):} Activates under large deformation; synthesizes pixels using the VoxCeleb prior distribution (uniform white teeth).
                 \end{itemize}
             \end{block}
         \end{column}
@@ -71,9 +71,9 @@
             \begin{block}{Core Finding}
                 \small
                 \begin{itemize}
-                    \item Pixel fidelity depends on the active pathway for each region.
-                    \item Regions with $O \approx 1$ mirror source specifics.
-                    \item Regions with $O \approx 0$ reflect training dataset priors.
+                    \item Pixel fidelity depends on the active pathway for each local region.
+                    \item Regions with $O \approx 1$ preserve subject-specific details from $S$.
+                    \item Regions with $O \approx 0$ reflect training dataset bias rather than the source.
                 \end{itemize}
             \end{block}
 

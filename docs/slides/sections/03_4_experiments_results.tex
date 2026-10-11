@@ -2,21 +2,21 @@
 \begin{frame}[fragile]{Inference Pipeline: Python Pseudocode}
     \begin{columns}[T]
         \begin{column}{0.56\textwidth}
-            \begin{block}{Frame-by-Frame Execution}
+            \begin{block}{Frame-by-Frame Execution Loop}
                 \scriptsize
 \begin{verbatim}
-# 1. Reference keypoints from source portrait
+# 1. Extract reference keypoints from source portrait
 kp_source = keypoint_detector(source_image)
 
-# 2. Iterate over driving video
+# 2. Iterate through driving video frames
 for frame_d in driving_video:
-    # Blackbox 1: Motion tracking
+    # Step 1: Motion tracking
     kp_driving = keypoint_detector(frame_d)
 
-    # Blackbox 2: Dense motion estimation
+    # Step 2: Dense motion & occlusion estimation
     flow, occ = dense_motion_net(kp_source, kp_driving)
 
-    # Blackbox 3: Warping & Inpainting
+    # Step 3: Flow warping & inpainting
     out_frame = generator(source_image, flow, occ)
 
     yield out_frame
@@ -25,12 +25,12 @@ for frame_d in driving_video:
         \end{column}
 
         \begin{column}{0.41\textwidth}
-            \textbf{Core Module Functions}
+            \textbf{Key Module Responsibilities}
             \begin{itemize}
                 \small
-                \item \texttt{keypoint\_detector}: Extracts 10 self-supervised reference points.
+                \item \texttt{keypoint\_detector}: Computes 10 unsupervised keypoint coordinates and local Jacobians.
                 \item \texttt{dense\_motion\_net}: Converts sparse point shifts into optical flow and an occlusion mask.
-                \item \texttt{generator}: Warps source pixels and inpaints missing areas (mouth/teeth).
+                \item \texttt{generator}: Warps source pixels and inpaints missing details (mouth, teeth).
             \end{itemize}
 
             \vspace{0.2cm}
@@ -42,9 +42,9 @@ for frame_d in driving_video:
 \end{frame}
 
 % --- Slide 2: Side-by-Side Results & External Video Links ---
-\begin{frame}{Results: Bella Poarch Benchmark}
+\begin{frame}{Experimental Results: Bella Poarch Benchmark}
     \begin{center}
-        \small \textbf{[Source $\mid$ Driving $\mid$ Synthesized Result]}
+        \small \textbf{Triplets: [Source Portrait $\mid$ Driving Frame $\mid$ Synthesized Result]}
     \end{center}
 
     \vspace{0.1cm}
@@ -54,7 +54,7 @@ for frame_d in driving_video:
             \includegraphics[width=\linewidth, height=2.3cm, keepaspectratio]{bella_comparison_f30.png}
             \vspace{0.05cm}
             
-            \scriptsize \textit{Frame 30 (1s): Head Tilt}
+            \scriptsize \textit{Frame 30 (1.0s): Head Tilt}
         \end{column}
         \begin{column}{0.32\textwidth}
             \centering
@@ -68,7 +68,7 @@ for frame_d in driving_video:
             \includegraphics[width=\linewidth, height=2.3cm, keepaspectratio]{bella_comparison_f20.png}
             \vspace{0.05cm}
             
-            \scriptsize \textit{Frame 20 (0.7s): Open Mouth \& Speech}
+            \scriptsize \textit{Frame 20 (0.7s): Mouth Opening \& Speech}
         \end{column}
     \end{columns}
 
@@ -77,7 +77,7 @@ for frame_d in driving_video:
     \begin{block}{Demo Video Link}
         \small
         \begin{itemize}
-            \item \textbf{3$\times$3 Comparison Grid Video (All Members):} \href{https://www.youtube.com/shorts/1zLsU1j765I}{\underline{\textcolor{primaryNavy}{Watch Online (External Link)}}}
+            \item \textbf{3$\times$3 Multi-Subject Comparison Video (All Members):} \href{https://www.youtube.com/shorts/1zLsU1j765I}{\underline{\textcolor{primaryNavy}{Watch Online (External Link)}}}
         \end{itemize}
     \end{block}
 \end{frame}

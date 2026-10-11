@@ -1,25 +1,25 @@
 \section{Ethics \& Conclusion}
 
 % --- Slide 1: Ethics & Detection ---
-\begin{frame}{Ethics \& DeepFake Detection}
+\begin{frame}{Ethical Implications \& DeepFake Detection}
     \begin{columns}[T]
         \begin{column}{0.48\textwidth}
-            \begin{block}{Risks}
+            \begin{block}{Societal Risks}
                 \small
                 \begin{itemize}
-                    \item \textbf{Impersonation:} Reenacting individuals without their knowledge or consent.
-                    \item \textbf{Misinformation:} Generating fabricated video statements.
+                    \item \textbf{Unauthorized Impersonation:} Reenacting individuals from a single photo without consent.
+                    \item \textbf{Misinformation:} Generating fabricated audiovisual material to deceive public opinion.
                 \end{itemize}
             \end{block}
         \end{column}
 
         \begin{column}{0.48\textwidth}
-            \begin{block}{Detection Methods}
+            \begin{block}{Detection Strategies}
                 \small
                 \begin{itemize}
-                    \item \textbf{Biological signals:} Heartbeat blood flow (rPPG), unnatural blinking patterns.
-                    \item \textbf{Frequency artifacts:} High-frequency noise left by GAN upsampling layers.
-                    \item \textbf{Watermarking / C2PA:} Cryptographic metadata embedded in original camera recordings.
+                    \item \textbf{Biological signals:} Unnatural blinking dynamics and subtle facial blood-flow pulses (rPPG).
+                    \item \textbf{Frequency artifacts:} High-frequency spectral artifacts from neural upsampling layers.
+                    \item \textbf{Watermarking / C2PA:} Cryptographic metadata and provenance tracking embedded at capture.
                 \end{itemize}
             \end{block}
         \end{column}
@@ -32,14 +32,14 @@
         \begin{column}{0.55\textwidth}
             \textbf{Summary}
             \begin{itemize}
-                \item FOMM successfully animates single portraits using 10 unsupervised keypoints and Jacobians.
-                \item Eliminates need for landmark detectors or 3D face models.
-                \item Self-occlusions are handled by inpainting, but rare features (braces) vanish due to lack of temporal memory.
+                \item FOMM animates single portraits using 10 unsupervised keypoints and local Jacobian transformations.
+                \item Eliminates dependency on manual facial landmarks or pre-built 3D face models.
+                \item Inpainting handles disocclusions, but rare traits (e.g., dental braces) vanish due to dataset bias and lack of temporal memory.
             \end{itemize}
         \end{column}
 
         \begin{column}{0.40\textwidth}
-            \begin{block}{Project Repo}
+            \begin{block}{Project Repository}
                 \centering
                 \small
                 Code, inputs, and outputs:\\

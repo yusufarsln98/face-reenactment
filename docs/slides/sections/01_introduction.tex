@@ -1,36 +1,36 @@
 \section{Introduction}
 
-\begin{frame}{Problem: Face Reenactment}
+\begin{frame}{Problem Formulation: Face Reenactment}
     \begin{columns}[c]
         \begin{column}{0.55\textwidth}
-            \textbf{Goal}
+            \textbf{Core Objective}
             \begin{itemize}
-                \item Animate a static \textbf{Source ($S$)} photo using motion from a \textbf{Driving ($D$)} video.
-                \item Keep identity of $S$, transfer motion from $D$.
+                \item Animate a static \textbf{Source portrait ($S$)} using motion from a \textbf{Driving video ($D$)}.
+                \item Preserve identity of $S$, transfer motion dynamics from $D$.
             \end{itemize}
 
             \vspace{0.3cm}
-            \textbf{Key Challenges}
+            \textbf{Key Technical Challenges}
             \begin{itemize}
-                \item \textbf{Identity preservation:} Avoid warping face features into driving face.
-                \item \textbf{Non-rigid motion:} Facial skin stretches and deforms (not just rigid 2D shift).
-                \item \textbf{Occlusions:} Mouth opening reveals unseen areas (teeth, tongue).
+                \item \textbf{Identity preservation:} Prevent facial morphology from warping into the driving face.
+                \item \textbf{Non-rigid deformation:} Model complex skin stretching and expressions, not just rigid 2D shifts.
+                \item \textbf{Occlusion handling:} Handle disoccluded areas (teeth, inner mouth) unseen in the source image.
             \end{itemize}
         \end{column}
 
         \begin{column}{0.44\textwidth}
-            \begin{block}{Input / Output}
+            \begin{block}{Input / Output Setup}
                 \small
                 \textbf{Inputs:}
                 \begin{itemize}
-                    \item One static portrait photo ($S$)
-                    \item A driving video sequence ($D$)
+                    \item A single static portrait image ($S$)
+                    \item An arbitrary driving video sequence ($D$)
                 \end{itemize}
                 \vspace{0.15cm}
                 \textbf{Output:}
                 \begin{itemize}
-                    \item Video of the person in $S$
-                    \item Mimicking the expressions and head movements of $D$
+                    \item Reenacted video sequence of $S$
+                    \item Mimicking head poses and facial expressions of $D$
                 \end{itemize}
             \end{block}
         \end{column}

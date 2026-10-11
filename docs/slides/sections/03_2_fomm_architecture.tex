@@ -4,7 +4,7 @@
         \begin{column}{0.54\textwidth}
             \textbf{Core Innovations}
             \begin{itemize}
-                \item \textbf{No Pretrained Landmarks:} Doesn't need 68 facial landmark detectors or 3D face models (3DMM).
+                \item \textbf{No Pretrained Landmarks:} Doesn't need 68 facial landmark detectors or 3D models (3DMM).
                 \item \textbf{Self-Supervised:} Learns keypoints automatically from raw video pairs.
                 \item \textbf{Appearance / Motion Decoupling:} Appearance comes from source $S$; motion comes from driving $D$.
                 \item \textbf{Generalizes Across Domains:} Works on human faces, bodies (Tai-Chi), and animals.
@@ -25,7 +25,7 @@
 \begin{frame}{Motion Representation: 0th-Order vs. 1st-Order Motion}
     \begin{columns}[c]
         \begin{column}{0.48\textwidth}
-            \textbf{Motion Representation}
+            \textbf{How Motion is Represented}
             \begin{itemize}
                 \item \textbf{0th-Order (Translation Only):}
                 \begin{itemize}
@@ -33,9 +33,9 @@
                     \item Cannot stretch skin; movement looks stiff and robotic.
                 \end{itemize}
                 \vspace{0.25cm}
-                \item \textbf{1st-Order (FOMM):}
+                \item \textbf{1st-Order (FOMM / Local Affine):}
                 \begin{itemize}
-                    \item Tracks deformation around each point.
+                    \item Estimates a Jacobian matrix around each point via first-order Taylor expansion.
                     \item Captures rotation (head tilts), scale (mouth opening), and shear (skin stretch).
                 \end{itemize}
             \end{itemize}
@@ -59,17 +59,17 @@
     \begin{columns}[T]
         \begin{column}{0.32\textwidth}
             \begin{block}{1. Keypoint Detector}
-                \scriptsize Hourglass network detects $K=10$ unsupervised keypoints and Jacobians.
+                \scriptsize Hourglass network extracts $K=10$ unsupervised keypoints and Jacobians.
             \end{block}
         \end{column}
         \begin{column}{0.32\textwidth}
             \begin{block}{2. Dense Motion Network}
-                \scriptsize Converts sparse points into optical flow ($T$) and an occlusion mask ($O$).
+                \scriptsize Combines sparse keypoint motions into dense optical flow ($T$) and an occlusion mask ($O$).
             \end{block}
         \end{column}
         \begin{column}{0.32\textwidth}
             \begin{block}{3. Inpainting Generator}
-                \scriptsize Warps source features using $T$ and inpaints occluded areas ($O \approx 0$).
+                \scriptsize Warps source features using flow $T$ and synthesizes occluded regions ($O \approx 0$).
             \end{block}
         \end{column}
     \end{columns}
