@@ -1,5 +1,5 @@
 % Section 4: rectified flow head swap with FLUX.2-klein-4B.
-% Numbers come from diffusion/faceswap_20_metrics_summary.csv and diffusion/REPORT.md.
+% Numbers come from rectified_flow/faceswap_20_metrics_summary.csv and rectified_flow/final_report/REPORT.md.
 % Figure inputs are relative to docs/report/.
 
 \section{Rectified Flow Head Swap}
@@ -10,7 +10,7 @@ We wanted to swap a video face with one from a selfie. The run had to stay on on
 The output had to keep the source motion, expression, lighting and background. Only the head should change. The clip is 96 frames at 512x512 and lasts 3.2 seconds.
 
 \subsection{How we measured}
-Every number comes from one script run on the same 96 frames, and the results table reports it. Face change is how much the face region moves from one frame to the next. The unswapped footage sets the level to match, so a value far below it means the smoother removed real motion too. Consecutive identity is how similar a face is to the one before it, measured in a face recognition embedding, so higher is more stable. Identity to the portrait measures similarity to the reference portrait; the unswapped footage scores near zero because it is a different person. Hair noise is how much the hair region flickers, and lower is better; p95 marks the worst frames, the value 95 percent stay under.
+Every number comes from one script, run once per variant, each on the same 96 frames (175 to 270). The results table reports it. Face change is how much the face region moves from one frame to the next. The unswapped footage sets the level to match, so a value far below it means the smoother removed real motion too. Consecutive identity is how similar a face is to the one before it, measured in a face recognition embedding, so higher is more stable. Identity to the portrait measures similarity to the reference portrait; the unswapped footage scores near zero because it is a different person. Hair noise is how much the hair region flickers, and lower is better; p95 marks the worst frames, the value 95 percent stay under.
 
 \subsection{Pipeline overview}
 The flow has four stages. Generation transfers the identity, restoration cleans each face with GFPGAN, smoothing removes the boil, and reassembly attaches the audio. Only the last stage writes a video file.
@@ -21,11 +21,11 @@ The boil is the flicker that comes from generating each frame on its own. Figure
 \subsection{How a rectified flow model works}
 A rectified flow model learns one job: connect a clean image and noise with a straight line. Training picks one random time per example and mixes the two ends at that time. The model predicts the direction that points from the noise end to the image end. The guess is compared with the true direction along the line, and the weights are then nudged.
 
-At sampling time the same model starts from pure noise. Each Euler step moves the sample a small way along the predicted direction, and an image forms. The sampling code calls these steps denoising steps, because the sample becomes less noisy at each step. Figure~\ref{fig:diffusion_process} draws training and sampling side by side.
+At sampling time the same model starts from pure noise. Each Euler step moves the sample a small way along the predicted direction, and an image forms. The sampling code calls these steps denoising steps, because the sample becomes less noisy at each step. Figure~\ref{fig:rectified_flow_process} draws training and sampling side by side.
 
-We did not train the base model; we used a released checkpoint. The released model is step distilled, so four steps are enough for it. We could not tell the difference between four steps and eight, and eight took twice the time.
+We did not train the base model; we used a released checkpoint. The released model is step distilled, so four steps are enough for it. We could not tell the difference between four steps and eight.
 
-\input{figures/fig_diffusion_process}
+\input{figures/fig_rectified_flow_process}
 \subsection{The model and the LoRA adapter}
 The model is a stack of transformer blocks (Figure~\ref{fig:architecture_lora}). A latent token of 128 channels is projected to width 3072. It passes through five double-stream blocks, then 20 single-stream blocks and a final layer. In the first part the text and image tokens stay apart, and they meet through joint attention.
 
@@ -43,7 +43,7 @@ FLUX.2-klein-4B renders each frame in four sampling steps. Each step moves the l
 
 The same VAE decodes the final latent into pixels. Picture order is part of the adapter contract: the adapter's own documentation names Picture 1 the body and Picture 2 the head, and says not to reverse the images. A reversed order gives the wrong head.
 
-The generator runs as a 4-bit GGUF file, and 256 pixels is the largest reference that fits. A detector refuses a frame with more than one face, and the gate has no bypass.
+The generator runs as a 4-bit GGUF file. A detector refuses a frame with more than one face, and the gate has no bypass.
 
 The output is 96 frames from 5.8 to 9.0 seconds of the source, all with one fixed seed. Each frame took 16.3 seconds, so the stage used 26.1 minutes.
 
@@ -65,7 +65,7 @@ We judged the look by eye and preferred v1, so the clip kept the v1 output. No m
     Adapter rank & 128 & 512 \\
     Seconds per frame & 16.34 & about 199, twelve times slower \\
     Peak VRAM allocated & 3.60 GiB & 4.68 GiB, past the 4.0 GiB of the card \\
-    Peak system RAM & 5.48 GiB & 5.50 GiB \\
+    Peak system RAM & 5.48 GiB & 5.3 to 5.5 GiB \\
     Cost for 96 frames & 26 minutes & about 5.3 hours \\
     \bottomrule
   \end{tabular}
@@ -79,7 +79,7 @@ GFPGAN v1.4 cleans every frame (Figure~\ref{fig:restoration}). It detects and al
 
 The stage costs 0.23 seconds per frame. The frames looked cleaner to us, and the mean face change came down, though the tail improved less.
 
-Hair noise fell slightly, a small gain on its own. The fidelity weight does nothing, because the official inference path passes no weight argument. Restoration cannot remove flicker, because it sees one frame at a time.
+Hair noise fell slightly, a small gain on its own. The fidelity weight does nothing: the v1.3.4 code passes no weight argument, and newer versions accept it without reading it. Restoration cannot remove flicker, because it sees one frame at a time.
 
 \input{figures/fig_restoration}
 \subsection{Temporal smoothing}
@@ -117,11 +117,11 @@ The recommended output is the chained set at strength 0.3. It beats the flow-onl
 \subsection{Reassembly}
 The encoder turns a frame set into a playable clip (Figure~\ref{fig:reassembly}). It writes H.264 at 29.969 fps, muxes the original audio back, and trims both streams. Its output is a 512x512 clip of 3.203 seconds.
 
-The encode adds nothing to the pixels. In the raw swapped set the face boils, and the results table holds the values.
+The encode is lossy: it changes pixels slightly, but it cannot alter the face motion. In the raw swapped set the face boils, and the results table holds the values.
 
 \input{figures/fig_reassembly}
 \subsection{Results}
-All numbers come from one script on the same 96 frames. Lower hair noise is better, and higher identity values are better. Face change should sit near the control level, because a value below it means the smoother removed real motion. The control row is the unswapped source footage.
+All numbers come from one script, run once per variant, each on the same 96 frames (175 to 270). Lower hair noise is better, and higher identity values are better. Face change should sit near the control level, because a value below it means the smoother removed real motion. The control row is the unswapped source footage.
 
 \begin{table}[tb]
   \centering
@@ -156,7 +156,5 @@ We standardised on the fast order. The internal cause was not established, but t
 
 One fixed seed covers the whole clip, so the noise input is constant. The boil still happens, because the model is sensitive to small input changes. Only a pass across frames reduces it.
 
-Memory set the last limit; larger references do not fit. The largest reference we could use is 256 pixels.
-
 \subsection{Limits}
-The results table shows a mean at the control level, but the tail stays high, so the picture still jumped on some frames. Each step works inside a frame or a short window, so no step removed that tail. The 256-pixel reference maximum is the second limit on this card.
+The results table shows a mean at the control level, but the tail stays high, so the picture still jumped on some frames. Each step works inside a frame or a short window, so no step removed that tail.

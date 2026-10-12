@@ -1,5 +1,5 @@
 % Figure: architecture of the generation stage. The sampler calls the model four times.
-% Facts and numbers come from diffusion/REPORT.md.
+% Facts and numbers come from rectified_flow/final_report/REPORT.md.
 % Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{arrows.meta}
 \begin{figure}[t]
   \centering
@@ -102,13 +102,10 @@
      changes the task, not the style.};
   \node[noteblock, text width=4.90cm, anchor=north west] at (5.35,2.19)
     {Four steps are enough. The base model is step distilled. Eight steps looked
-     the same and took twice the time.};
+     the same.};
   \node[noteblock, text width=4.85cm, anchor=north west] at (10.55,2.19)
     {The order of the two pictures is part of the contract. Reversing them gives a
      plausible image with the wrong head.};
-  \node[noteblock, text width=4.40cm, anchor=north west] at (11.05,4.30)
-    {A 512 pixel reference does not fit in the remaining memory. 256 pixels is the
-     measured maximum.};
 
   \end{tikzpicture}
   \caption{Inside the generation stage: Qwen3-4B encodes the prompt once, and the

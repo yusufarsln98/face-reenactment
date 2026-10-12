@@ -87,8 +87,8 @@
 
   % ================= notes =================
   \node[noteblock, text width=3.55cm, anchor=north west] at (11.50,10.35)
-    {Training needs a very large image set and many GPU hours. We did not train this model.
-     We used a released checkpoint and trained only a small adapter on top of it.};
+    {Training needs a very large image set and many GPU hours. We trained nothing: the
+     base checkpoint and the community-trained adapter are both released weights.};
   \node[noteblock, text width=6.95cm, anchor=west] at (7.70,5.40)
     {The model predicts the direction, not a noise. Every Euler step moves the sample
      along that direction.};
@@ -104,5 +104,5 @@
     direction along the straight line between the two ends. Sampling starts from noise and
     takes four Euler steps along the predicted direction. Both jobs use one and the same
     network.}
-  \label{fig:diffusion_process}
+  \label{fig:rectified_flow_process}
 \end{figure}

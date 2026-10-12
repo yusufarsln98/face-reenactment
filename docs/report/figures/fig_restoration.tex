@@ -1,5 +1,5 @@
 % Figure: the face restoration stage (detect, align, restore, composite).
-% Facts come from diffusion/REPORT.md, section 4.
+% Facts come from rectified_flow/final_report/REPORT.md, section 4.
 % Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{positioning,arrows.meta}
 \begin{figure}[t]
   \centering
@@ -29,9 +29,9 @@
   \node[anchor=north, inner sep=1pt, font=\scriptsize, text width=3.30cm, align=center]
     (nets) at ([yshift=-2pt]nett.south)
     {GFPGAN v1.4, trained to map degraded faces onto clean ones};
-  \node[block, text width=2.60cm, minimum height=6mm] (enc) at (7.55,0.10) {encoder};
-  \node[block, text width=2.60cm, minimum height=6mm] (dbl) at (7.55,-0.80) {detail blocks};
-  \node[block, text width=2.60cm, minimum height=6mm] (dec) at (7.55,-1.70) {decoder};
+  \node[block, text width=2.60cm, minimum height=6mm, font=\scriptsize] (enc) at (7.55,0.10) {Unet encoder};
+  \node[block, text width=2.60cm, minimum height=6mm, font=\scriptsize] (dbl) at (7.55,-0.80) {SFT layers};
+  \node[block, text width=2.60cm, minimum height=6mm, font=\scriptsize] (dec) at (7.55,-1.70) {StyleGAN2 decoder};
   \draw[flow] (enc.south) -- (dbl.north);
   \draw[flow] (dbl.south) -- (dec.north);
 
@@ -50,8 +50,8 @@
     {The weights are the official release. The network was rebuilt in project code
      because the published wrappers do not import.};
   \node[noteblock, execute at begin node=\raggedright, text width=7.50cm, anchor=north west] at (7.45,-2.70)
-    {The fidelity weight does nothing. The official inference path passes no weight
-     argument.};
+    {The fidelity weight does nothing. The v1.3.4 code passes no weight argument, and
+     newer versions accept it without reading it.};
   \node[noteblock, execute at begin node=\raggedright, text width=5.50cm, anchor=north west] at (9.60,2.20)
     {Restoration sees one frame at a time, so it cannot remove flicker.};
 

@@ -1,5 +1,5 @@
 % Figure: the reassembly stage (encode the frames, mux the source audio back).
-% Facts come from diffusion/REPORT.md, section 6.
+% Facts come from rectified_flow/final_report/REPORT.md, section 6.
 % Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{positioning,arrows.meta}
 \begin{figure}[t]
   \centering
@@ -39,8 +39,8 @@
 
   % ---------------- notes ----------------
   \node[noteblock, text width=7.10cm, anchor=north west] at (0.54,-2.20)
-    {The encoder cannot change a pixel. It only writes what the stages before it
-     produced.};
+    {The encode is lossy: it changes pixels slightly, but it cannot alter the face
+     motion.};
   \node[noteblock, text width=7.30cm, anchor=north west] at (8.10,2.60)
     {The same script is the last stage of the whole flow, so the final video is a
      later run of this encoder.};
