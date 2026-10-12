@@ -1,8 +1,8 @@
-% Section 4: diffusion-based head swap with FLUX.2-klein-4B.
+% Section 4: rectified flow head swap with FLUX.2-klein-4B.
 % Numbers come from diffusion/faceswap_20_metrics_summary.csv and diffusion/REPORT.md.
 % Figure inputs are relative to docs/report/.
 
-\section{Diffusion-Based Head Swap}
+\section{Rectified Flow Head Swap}
 
 \subsection{Scope and hardware}
 We wanted to swap a video face with one from a selfie. The run had to stay on one laptop with a 4 GB NVIDIA GPU and 8 GB of system RAM. We sent no data to a cloud service.
@@ -18,41 +18,40 @@ The flow has four stages. Generation transfers the identity, restoration cleans 
 The boil is the flicker that comes from generating each frame on its own. Figure~\ref{fig:pipeline_overview} shows the chain in order, with the cost of each stage.
 
 \input{figures/fig_pipeline_overview}
-\subsection{How the diffusion model works}
-A diffusion model learns one job: look at a noisy image and say what noise is in it. Training adds noise to clean images in small steps until only noise is left. The network guesses the noise at each level, and the guess is compared with the truth. The weights are then nudged.
+\subsection{How a rectified flow model works}
+A rectified flow model learns one job: connect a clean image and noise with a straight line. Training picks one random time per example and mixes the two ends at that time. The model predicts the direction that points from the noise end to the image end. The guess is compared with the true direction along the line, and the weights are then nudged.
 
-After training, the same network runs backwards. It starts from pure noise and removes its own guess at every step, so an image forms. The forward direction only exists for training, and we never run it to generate. Figure~\ref{fig:diffusion_process} draws both directions.
+At sampling time the same model starts from pure noise. Each Euler step moves the sample a small way along the predicted direction, and an image forms. The sampling code calls these steps denoising steps, because the sample becomes less noisy at each step. Figure~\ref{fig:diffusion_process} draws training and sampling side by side.
 
 We did not train the base model; we used a released checkpoint. The released model is step distilled, so four steps are enough for it. We could not tell the difference between four steps and eight, and eight took twice the time.
 
 \input{figures/fig_diffusion_process}
-\subsection{The denoiser and the LoRA adapter}
-The denoiser is a stack of transformer blocks (Figure~\ref{fig:architecture_lora}). A latent token of 128 channels is projected to width 3072. It passes through five double-stream blocks, then 20 single-stream blocks and a final layer. In the first part the text and image tokens stay apart, and they meet through joint attention.
+\subsection{The model and the LoRA adapter}
+The model is a stack of transformer blocks (Figure~\ref{fig:architecture_lora}). A latent token of 128 channels is projected to width 3072. It passes through five double-stream blocks, then 20 single-stream blocks and a final layer. In the first part the text and image tokens stay apart, and they meet through joint attention.
 
 Later the two streams are joined into one. The final layer projects back to 128 channels for the decoder.
 
-The adapter is a small pair of matrices, A and B, trained beside each frozen weight. The block output adds a scaled product of A and B to the frozen term. Only A and B are trained, so the base weights never change. The adapter carries the head swap behaviour.
+The adapter is a small pair of matrices, A and B, trained beside each frozen weight. The adapter attaches inside the transformer blocks. It takes the attention projections and the feed-forward linears, and in the single-stream blocks the two fused linears. The block output adds a scaled product of A and B to the frozen term. Only A and B are trained, so the base weights never change. The adapter carries the head swap behaviour.
 
 \input{figures/fig_architecture_lora}
 \subsection{Generation}
-Generation (Figure~\ref{fig:generation_architecture}) covers conditioning, denoising and decoding. A fixed prompt of 409 characters names Picture 1 as the body and Picture 2 as the head.
+Generation (Figure~\ref{fig:generation_architecture}) covers conditioning, sampling and decoding. A fixed prompt of 409 characters names Picture 1 as the body and Picture 2 as the head.
 
 Qwen3-4B encodes the prompt once per session on the CPU, about 80 seconds, and its memory is then freed. Both pictures become VAE latents: the 512x512 body crop a 64x64x32 grid of about 1024 tokens, the 256x256 portrait about 256 tokens.
 
-FLUX.2-klein-4B renders each frame in four denoising steps (Figure~\ref{fig:denoising_loop}). The text embeddings and the two image latents guide every step. A community-trained LoRA adapter of 100 modules carries the head swap.
+FLUX.2-klein-4B renders each frame in four sampling steps. Each step moves the latent along the direction the model predicts. The sampler calls the model once per step and feeds the result back. The text embeddings and the two image latents guide every step. A community-trained LoRA adapter of 80 adapted weights carries the head swap.
 
-The same VAE decodes the final latent into pixels. Picture order is part of the model contract, so a reversed order gives the wrong head.
+The same VAE decodes the final latent into pixels. Picture order is part of the adapter contract: the adapter's own documentation names Picture 1 the body and Picture 2 the head, and says not to reverse the images. A reversed order gives the wrong head.
 
 The generator runs as a 4-bit GGUF file, and 256 pixels is the largest reference that fits. A detector refuses a frame with more than one face, and the gate has no bypass.
 
 The output is 96 frames from 5.8 to 9.0 seconds of the source, all with one fixed seed. Each frame took 16.3 seconds, so the stage used 26.1 minutes.
 
 \input{figures/fig_generation_architecture}
-\input{figures/fig_denoising_loop}
 \subsubsection{Adapter version comparison}
 The recorded clip uses adapter v1 throughout. A newer adapter, v1.1, was released during the work, and we tested two prompt variants, A and B. Table~\ref{tab:adapters} compares the two versions.
 
-v1.1 ran, but it went far past the memory of the card, which is why it slowed down so much. The extra time was not worth it for us.
+v1.1 ran, but it went far past the memory of the card, which is why it slowed down so much. The v1.1 adapter has rank 512 against the 128 of v1, so it is four times larger. That is why it went past the card and slowed down. The extra time was not worth it for us.
 
 We judged the look by eye and preferred v1, so the clip kept the v1 output. No metric script was run on v1.1, so every other number here comes from v1. The grids in Figure~\ref{fig:lora_compare} are the only evidence.
 
@@ -63,6 +62,7 @@ We judged the look by eye and preferred v1, so the clip kept the v1 output. No m
     \toprule
     & v1 (recorded) & v1.1 (new) \\
     \midrule
+    Adapter rank & 128 & 512 \\
     Seconds per frame & 16.34 & about 199, twelve times slower \\
     Peak VRAM allocated & 3.60 GiB & 4.68 GiB, past the 4.0 GiB of the card \\
     Peak system RAM & 5.48 GiB & 5.50 GiB \\

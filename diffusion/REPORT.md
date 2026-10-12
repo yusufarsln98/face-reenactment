@@ -1,8 +1,8 @@
-# Diffusion-Based Face Replacement on a 4 GB Laptop GPU
+# Rectified Flow Face Replacement on a 4 GB Laptop GPU
 
 ## 1. Scope and constraints
 
-Our goal was to swap the face in a video with one from a selfie. We ran the diffusion model on a system with 4 GB NVIDIA GPU and 8 GB of system RAM. No cloud service was used. The weights of the FLUX.2-klein, Wan 2.2 the head-swap adapter models we used are open source (otherwise we couldn't have used them). The output *should* keep the source motion, expression, lighting, and background, and replace only the head.
+Our goal was to swap the face in a video with one from a selfie. We ran the rectified flow model on a system with 4 GB NVIDIA GPU and 8 GB of system RAM. No cloud service was used. The weights of the FLUX.2-klein, Wan 2.2 the head-swap adapter models we used are open source (otherwise we couldn't have used them). The output *should* keep the source motion, expression, lighting, and background, and replace only the head.
 
 ## 2. Pipeline overview
 
@@ -35,7 +35,7 @@ to 04, and they are not part of the flow above.
 ## 3. Generation
 
 This is the stage that actually transfers identity. It has three parts: conditioning,
-denoising, and decoding.
+sampling, and decoding.
 
 ![Generation: architecture and data flow](faceswap_30_generation_architecture.png)
 
@@ -52,9 +52,10 @@ The body frame is a 512x512 centre crop of the source video, which becomes a 64x
 latent grid and about 1024 tokens. The portrait is resized to 256x256 and becomes about
 256 tokens; it supplies identity only.
 
-**Denoising.** FLUX.2-klein-4B renders each frame. It starts from noise and refines it
-over four steps, guided at every step by the text embeddings and the two image latents.
-A community-trained LoRA adapter (100 modules) supplies the head-swap behaviour; it
+**Sampling.** FLUX.2-klein-4B renders each frame. It predicts the direction from the
+noisy sample to the clean one, and the sampler takes a step along it, guided at every
+step by the text embeddings and the two image latents.
+A community-trained LoRA adapter (80 adapted weights) supplies the head-swap behaviour; it
 changes 99.5 percent of the pixels relative to the unadapted model, so it changes the
 task, not the style. Four steps are enough because the base model is step-distilled:
 eight steps were measured to look the same and to take twice the time.

@@ -1,4 +1,4 @@
-% Figure: the denoiser drawn as a stack of layers, and the LoRA adapter on one linear layer.
+% Figure: the model network, and the LoRA adapter on one weight inside a block.
 % Facts come from the published model repository and model card.
 % Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{positioning,arrows.meta},
 %                            and amsmath for \frac in the adapter formula.
@@ -18,29 +18,27 @@
     arrowlab/.style={font=\scriptsize, fill=white, inner sep=1pt},
   ]
 
-  % ================= left part: the denoiser as a stack of layers =================
-  \node[inputblock, anchor=north, text width=6.40cm, minimum height=0.90cm] (lat) at (6.54,10.55)
+  % ================= left part: the path of the model =================
+  \node[inputblock, anchor=north, text width=5.60cm, minimum height=0.80cm] (lat) at (5.62,14.60)
     {\textbf{latent token}, 128 channels};
-  \node[block, text width=6.40cm, minimum height=0.90cm, below=0.32cm of lat] (proj)
-    {\textbf{input projection} to width 3072};
-  \node[block, text width=6.40cm, minimum height=1.15cm, below=0.32cm of proj] (tstep)
-    {\textbf{timestep embedding}\\[1pt]\scriptsize sets scale and shift for every block};
-  \node[block, text width=6.40cm, minimum height=1.15cm, below=0.32cm of tstep] (ds)
+  \node[block, text width=5.60cm, minimum height=0.80cm, below=0.28cm of lat] (proj)
+    {\textbf{project to 3072}};
+  \node[block, text width=5.60cm, minimum height=1.10cm, below=0.28cm of proj] (ds)
     {\textbf{5 double-stream blocks}\\[1pt]\scriptsize text and image tokens stay apart,
      joint attention};
-  \node[block, text width=6.40cm, minimum height=0.90cm, below=0.32cm of ds] (cat)
+  \node[block, text width=5.60cm, minimum height=0.80cm, below=0.28cm of ds] (cat)
     {\textbf{concatenate the two streams}};
-  \node[block, text width=6.40cm, minimum height=1.15cm, below=0.32cm of cat] (ss)
+  \node[block, text width=5.60cm, minimum height=1.10cm, below=0.28cm of cat] (ss)
     {\textbf{20 single-stream blocks}\\[1pt]\scriptsize one stream, joint attention};
-  \node[block, text width=6.40cm, minimum height=1.15cm, below=0.32cm of ss] (fin)
+  \node[block, text width=5.60cm, minimum height=1.10cm, below=0.28cm of ss] (fin)
     {\textbf{final layer}\\[1pt]\scriptsize adaptive layer norm, project to 128 channels};
-  \node[inputblock, text width=6.40cm, minimum height=0.90cm, below=0.32cm of fin] (latout)
-    {\textbf{latent}, to the decoder};
-  \foreach \a/\b in {lat/proj, proj/tstep, tstep/ds, ds/cat, cat/ss, ss/fin, fin/latout}
+  \node[inputblock, text width=5.60cm, minimum height=0.80cm, below=0.28cm of fin] (latout)
+    {\textbf{latent to the decoder}};
+  \foreach \a/\b in {lat/proj, proj/ds, ds/cat, cat/ss, ss/fin, fin/latout}
     {\draw[flow] (\a.south) -- (\b.north);}
 
   % the text encoder enters through joint attention (dashed = conditioning path)
-  \node[block, text width=2.10cm, left=0.70cm of cat] (enc)
+  \node[block, text width=1.70cm, left=0.40cm of cat] (enc)
     {\textbf{Qwen3-4B}\\[1pt]\scriptsize text encoder};
   \coordinate (txtcorner) at (enc.north |- ds.center);
   \draw[feed] (enc.north) -- (txtcorner) -- (ds.west);
@@ -48,51 +46,73 @@
   \node[arrowlab, align=center, text width=1.70cm, anchor=south] at ([yshift=0.14cm]txtmid)
     {text tokens,\\width 7680};
 
-  % the timestep embedding modulates every block (dashed = conditioning path)
-  \draw[feed] (tstep.east) -- ++(0.35,0) coordinate (tbus);
-  \draw[draw=black!75, line width=0.7pt, dashed] (tbus) -- (tbus |- fin.center);
+  % the timestep embedding feeds both block rows and the final layer
+  \path (ds.east) -- ++(0.25,0) coordinate (tbus);
+  \draw[draw=black!75, line width=0.7pt, dashed] (tbus |- ds.center) -- (tbus |- fin.south);
   \foreach \s in {ds,ss,fin}{\draw[feed] (tbus |- \s.center) -- (\s.east);}
+  \node[block, text width=2.10cm, minimum height=1.20cm, anchor=west] (tstep)
+    at ([xshift=0.15cm]tbus |- fin.south)
+    {\textbf{timestep embedding}\\[1pt]\scriptsize sets scale and shift for every block};
+  \draw[feed] (tbus |- fin.south) -- (tstep.west);
 
-  % ================= right part: how the adapter attaches =================
-  \node[inputblock, text width=2.40cm, minimum height=0.75cm] (layin) at (12.45,10.10)
-    {layer input $x$};
-  \node[block, text width=1.70cm, minimum height=2.35cm] (wgt) at (11.55,7.575)
-    {\textbf{frozen weight $W$}};
-  \node[block, text width=0.50cm, minimum height=0.90cm] (bA) at (13.35,8.30) {\textbf{A}};
-  \node[block, text width=0.50cm, minimum height=0.90cm] (bB) at (13.35,6.85) {\textbf{B}};
+  % ================= right part: the adapter zoom, linked to the stack =================
+  \node[inputblock, text width=2.00cm, minimum height=0.75cm] (layin)
+    at ([xshift=4.54cm]ds.north east) {layer input $x$};
+
+  % a bracket spans the two block rows and runs to the zoom
+  \coordinate (brT) at ([xshift=0.59cm]ds.north east);
+  \coordinate (brB) at ([xshift=0.59cm]ss.south east);
+  \draw[draw=black!75, line width=0.7pt] (brT) -- (brB);
+  \draw[draw=black!75, line width=0.7pt] ([xshift=-0.18cm]brT) -- (brT);
+  \draw[draw=black!75, line width=0.7pt] (brB) -- ([xshift=-0.18cm]brB);
+  \draw[flow] (brT) -- (layin.west);
+  \path (brT) -- (layin.west) coordinate[midway] (linkmid);
+  \node[arrowlab, align=center, text width=1.80cm, anchor=south]
+    at ([yshift=0.12cm]linkmid) {one of 80\\adapted weights};
+
+  \coordinate (zbr) at ([yshift=-0.70cm]layin.south);
+  \node[block, text width=2.15cm, minimum height=2.05cm] (wgt)
+    at ([xshift=-0.85cm,yshift=-1.975cm]layin.south)
+    {\textbf{$W$}\\[1pt]\scriptsize the block's own\\[1pt]weight, frozen};
+  \node[block, text width=0.45cm, minimum height=0.90cm] (bA)
+    at ([xshift=0.70cm,yshift=-1.40cm]layin.south) {\textbf{A}};
+  \node[block, text width=0.45cm, minimum height=0.90cm, below=0.20cm of bA] (bB) {\textbf{B}};
   \draw[flow] (bA.south) -- (bB.north);
+  \draw[draw=black!75, line width=0.7pt] (layin.south) -- (zbr);
+  \draw[draw=black!75, line width=0.7pt] (zbr -| wgt.north) -- (zbr -| bA.north);
+  \draw[flow] (zbr -| wgt.north) -- (wgt.north);
+  \draw[flow] (zbr -| bA.north) -- (bA.north);
 
-  \coordinate (br) at (12.45,9.30);
-  \draw[draw=black!75, line width=0.7pt] (layin.south) -- (br);
-  \draw[draw=black!75, line width=0.7pt] (br -| wgt.north) -- (br -| bA.north);
-  \draw[flow] (br -| wgt.north) -- (wgt.north);
-  \draw[flow] (br -| bA.north) -- (bA.north);
+  \coordinate (zmg) at ([yshift=-0.60cm]bB.south);
+  \draw[flow] (wgt.south) -- (zmg -| wgt.south);
+  \draw[flow] (bB.south) -- (zmg -| bB.south);
+  \draw[draw=black!75, line width=0.7pt] (zmg -| wgt.south) -- (zmg -| bB.south);
+  \node[circle, draw=black!70, line width=0.5pt, fill=white, inner sep=0.6pt] at (zmg) {$+$};
+  \node[inputblock, text width=1.85cm, minimum height=0.75cm] (zout)
+    at ([yshift=-0.725cm]zmg) {output};
+  \draw[flow] (zmg) -- (zout.north);
+  \node[font=\small] (formula) at ([yshift=-0.55cm]zout.south) {$Wx + \frac{\alpha}{r}BAx$};
 
-  \coordinate (mg) at (12.45,6.05);
-  \draw[flow] (wgt.south) -- (mg -| wgt.south);
-  \draw[flow] (bB.south) -- (mg -| bB.south);
-  \draw[draw=black!75, line width=0.7pt] (mg -| wgt.south) -- (mg -| bB.south);
-  \node[fill=white, inner sep=0.5pt] at (mg) {$+$};
-  \node[inputblock, text width=1.85cm, minimum height=0.75cm] (layout) at (12.45,5.30)
-    {output};
-  \draw[flow] (mg) -- (layout.north);
-  \node[font=\small] (formula) at (12.45,4.45) {$Wx + \frac{\alpha}{r}BAx$};
-
-  \node[font=\scriptsize, align=left, text width=1.05cm, anchor=west] (abl) at (13.90,7.575)
-    {rank $r$\\trained};
+  \node[font=\scriptsize, align=left, text width=1.20cm, anchor=west] (abl)
+    at ([xshift=0.10cm]bA.east) {\textbf{adapter}\\[1pt]rank 128,\\trained};
 
   % ================= notes =================
-  \node[noteblock, text width=2.10cm, anchor=north west] at (0.12,3.40)
+  \coordinate (notetop) at ([yshift=-0.35cm]latout.south);
+  \node[noteblock, text width=2.10cm, anchor=north west] at (0.45,0 |- notetop)
     {This layer stack is the published layout. We did not change it.};
-  \node[noteblock, text width=4.40cm, anchor=north west] at (10.60,3.95)
+  \node[noteblock, text width=4.40cm, anchor=north west] at (3.20,0 |- notetop)
     {Only A and B are trained. $W$ never changes, so the adapter is small and it can be
      removed again.};
-  \node[noteblock, text width=4.40cm, anchor=north west] at (10.60,2.10)
-    {The adapter has 100 modules. It teaches the base model the head swap task, so it changes
-     what the model does, not how it looks.};
+  \node[noteblock, text width=4.40cm, anchor=north west] at (10.70,0 |- notetop)
+    {The adapter adapts 80 weights. In each double-stream block it takes the
+     attention projections and the feed-forward linears of both streams, eight
+     weights in all. In each single-stream block it takes the two fused linears.};
 
   \end{tikzpicture}
-  \caption{The denoiser as a stack of layers. The text encoder and the timestep embedding enter
-    as conditioning, and the adapter adds a small trained branch beside a frozen weight.}
+  \caption{The model path: the latent token is projected to width 3072, passes the
+    double-stream and single-stream blocks, and the final layer returns the latent for the
+    decoder. The text encoder and the timestep embedding enter as conditioning. The bracket
+    on the right marks one weight inside a block, where a small trained adapter sits beside
+    the block's own frozen weight.}
   \label{fig:architecture_lora}
 \end{figure}

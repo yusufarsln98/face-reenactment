@@ -1,4 +1,4 @@
-% Figure: architecture of the generation stage (conditioning, denoising, decoding).
+% Figure: architecture of the generation stage. The sampler calls the model four times.
 % Facts and numbers come from diffusion/REPORT.md.
 % Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{arrows.meta}
 \begin{figure}[t]
@@ -15,86 +15,105 @@
     noteblock/.style={rectangle, rounded corners=2pt, draw=black!45, dashed,
       fill=red!8, align=left, inner sep=3pt, font=\scriptsize},
     flow/.style={->, >=Latex, line width=0.7pt, draw=black!75},
-    bundle/.style={->, >=Latex, line width=1.2pt, draw=black!75},
     feed/.style={line width=0.7pt, draw=black!75},
     arrowlab/.style={font=\scriptsize, fill=white, inner sep=1pt},
   ]
 
-  % ---------------- conditioning (top) ----------------
-  \node[inputblock, text width=2.55cm] (prompt) at (1.42,4.10)
+  % ---------------- conditioning: prompt, text encoder, embeddings (top) ----------------
+  \node[inputblock, text width=2.60cm] (prompt) at (1.47,12.24)
     {\textbf{Fixed prompt,}\\\textbf{409 characters}\\[1pt]\scriptsize names Picture 1
      and Picture 2};
-  \node[block, text width=4.45cm] (enc) at (5.60,4.10)
+  \node[block, text width=4.10cm] (enc) at (5.30,12.24)
     {\textbf{Qwen3-4B text encoder}\\[1pt]\scriptsize CPU, 4 bit, about 80 s once per
      session, then its memory is freed};
-  \node[block, text width=2.95cm] (emb) at (9.99,4.10) {\textbf{text embeddings}};
+  \node[block, text width=2.95cm] (emb) at (9.60,12.24) {\textbf{text embeddings}};
   \draw[flow] (prompt.east) -- (enc.west);
   \draw[flow] (enc.east) -- (emb.west);
 
-  % ---------------- denoising chain (middle) ----------------
-  \node[block, text width=4.45cm] (flux) at (2.37,2.10)
-    {\textbf{FLUX.2-klein-4B}\\[1pt]\scriptsize 4 bit GGUF};
-  \node[block, text width=5.70cm] (steps) at (8.19,2.10)
-    {\textbf{4 denoising steps}\\[1pt]\scriptsize guided at every step};
-  \node[block, text width=1.30cm] (dec) at (12.36,2.10) {\textbf{VAE}\\\textbf{decode}};
-  \node[inputblock, text width=1.60cm] (frame) at (14.40,2.10)
-    {\textbf{512x512}\\\textbf{frame}};
-  \node[block, text width=2.60cm] (lora) at (1.74,0.35)
-    {\textbf{LoRA adapter}\\[1pt]\scriptsize 100 modules};
-  \draw[flow] (lora.north) -- (flux.south);
-  \draw[flow] (flux.east) -- (steps.west);
-  \draw[flow] (steps.east) -- (dec.west);
-  \draw[flow] (dec.east) -- (frame.west);
-
-  % ---------------- image branches (lower left) ----------------
-  \node[inputblock, text width=2.10cm] (bodyf) at (1.19,-2.40)
+  % ---------------- image branches (left) ----------------
+  \node[inputblock, text width=2.10cm] (bodyf) at (1.20,10.25)
     {\textbf{Body frame}\\\textbf{512x512}\\[1pt]\scriptsize centre crop of
      the source video};
-  \node[block, text width=1.30cm] (vaeA) at (3.57,-2.40) {\textbf{VAE}\\\textbf{encode}};
-  \node[block, text width=2.40cm] (latA) at (6.10,-2.40)
+  \node[block, text width=1.35cm] (vaeA) at (3.35,10.25) {\textbf{VAE}\\\textbf{encode}};
+  \node[block, text width=2.45cm] (latA) at (5.85,10.25)
     {\textbf{64x64x32 latent}\\[1pt]\scriptsize about 1024 tokens};
   \draw[flow] (bodyf.east) -- (vaeA.west);
   \draw[flow] (vaeA.east) -- (latA.west);
 
-  \node[inputblock, text width=1.70cm] (port) at (0.99,-4.40)
+  \node[inputblock, text width=1.75cm] (port) at (1.20,8.45)
     {\textbf{Portrait}\\\textbf{256x256}\\[1pt]\scriptsize identity only};
-  \node[block, text width=1.30cm] (vaeB) at (3.57,-4.40) {\textbf{VAE}\\\textbf{encode}};
-  \node[block, text width=2.60cm] (latB) at (6.20,-4.40)
+  \node[block, text width=1.35cm] (vaeB) at (3.35,8.45) {\textbf{VAE}\\\textbf{encode}};
+  \node[block, text width=2.45cm] (latB) at (5.85,8.45)
     {\textbf{about 256 tokens}\\[1pt]\scriptsize identity only};
   \draw[flow] (port.east) -- (vaeB.west);
   \draw[flow] (vaeB.east) -- (latB.west);
 
-  % ---------------- conditioning into the denoising steps ----------------
-  \draw[flow] (emb.south -| 10.10,0) -- (10.10,2.66);
-  \draw[feed] (latA.east) -- (8.40,-2.40) -- (8.40,0.90) -- (8.95,0.90);
-  \draw[feed] (latB.east) -- (9.40,-4.40) -- (9.40,0.90) -- (8.95,0.90);
-  \draw[bundle] (8.95,0.90) -- (8.95,1.60);
-  \node[font=\scriptsize, anchor=east, fill=white, inner sep=1pt] at (8.15,0.88) {2 image latents};
+  % ---------------- out of the loop: final latent, decode, frame (right) ----------------
+  \node[inputblock, text width=1.05cm] (final) at (11.315,5.31)
+    {\textbf{final}\\\textbf{latent}};
+  \node[block, text width=1.25cm] (dec) at (12.975,5.31) {\textbf{VAE}\\\textbf{decode}};
+  \node[inputblock, text width=1.50cm] (frame) at (14.86,5.31)
+    {\textbf{512x512}\\\textbf{frame}};
+
+  % ---------------- the sampler container: the loop around the model ----------------
+  \draw[draw=black!70, line width=0.5pt, rounded corners=2pt, fill=orange!8]
+    (3.30,2.39) rectangle (10.30,7.55);
+  \node[anchor=north west, inner sep=0pt] at (3.50,7.45) {\textbf{the sampler, four steps}};
+
+  \node[inputblock, text width=1.75cm] (state) at (4.75,5.31)
+    {\textbf{current latent}\\[1pt]\scriptsize starts as noise,\\one fixed seed};
+  \node[block, text width=3.35cm] (model) at (8.00,5.31)
+    {\textbf{FLUX.2-klein-4B}\\\textbf{+ LoRA}\\[1pt]\scriptsize predicts the direction};
+
+  \draw[flow] (state.east) -- (model.west);
+  \draw[flow] (model.east) -- (10.10,5.31);
+  \fill[black!75] (10.10,5.31) circle (1.2pt);
+  \draw[flow] (10.10,5.31) -- (final.west);
+  \draw[flow] (final.east) -- (dec.west);
+  \draw[flow] (dec.east) -- (frame.west);
+
+  % the loop back: the output re-enters the latent state
+  \draw[flow] (10.10,5.31) -- (10.10,3.89) -- (4.75,3.89) -- (state.south);
+
+  % the step counter sits on the loop, and the step number enters the model
+  \node[stageblock, text width=1.95cm, minimum height=0.55cm] (chip) at (8.60,3.89)
+    {\textbf{step 1 of 4}};
+  \draw[flow] (chip.north) -- (chip.north |- model.south);
+  \node[font=\scriptsize, anchor=west] at (8.75,4.42) {timestep};
+  \node[font=\scriptsize, text width=3.00cm, align=center, anchor=north] at (5.85,3.76)
+    {predict the direction,\\step along it,\\go again};
+  \node[font=\scriptsize, text width=2.65cm, align=left, anchor=north west] at (7.55,3.45)
+    {the model is called four times, once per step};
+
+  % ---------------- the same conditioning enters the model at every call ----------------
+  \draw[feed] (latA.east) -- (8.60,10.25) -- (8.60,8.05) -- (9.60,8.05);
+  \draw[feed] (latB.east) -- (8.60,8.45);
+  \draw[feed] (emb.south) -- (9.60,8.05);
+  \fill[black!75] (8.60,8.45) circle (1.2pt);
+  \fill[black!75] (9.60,8.05) circle (1.2pt);
+  \draw[flow] (9.60,8.05) -- (9.60,8.05 |- model.north);
+  \node[font=\scriptsize, fill=white, inner sep=1.5pt, align=center, text width=3.00cm,
+    anchor=north east] at (10.15,6.88) {the same conditioning\\at every step};
+  \node[arrowlab, anchor=east] at (8.45,9.45) {2 image latents};
 
   % ---------------- notes ----------------
-  \node[noteblock, text width=4.50cm, anchor=north west] at (3.50,0.60)
+  \node[noteblock, text width=4.90cm, anchor=north west] at (0.15,2.19)
     {The LoRA changes 99.5 percent of the pixels against the unadapted model, so it
      changes the task, not the style.};
-  \node[noteblock, text width=5.30cm, anchor=north west] at (9.80,1.13)
+  \node[noteblock, text width=4.90cm, anchor=north west] at (5.35,2.19)
     {Four steps are enough. The base model is step distilled. Eight steps looked
      the same and took twice the time.};
-  \node[noteblock, text width=5.30cm, anchor=north west] at (9.80,-0.27)
+  \node[noteblock, text width=4.85cm, anchor=north west] at (10.55,2.19)
     {The order of the two pictures is part of the contract. Reversing them gives a
      plausible image with the wrong head.};
-  \node[noteblock, text width=5.30cm, anchor=north west] at (9.80,-4.00)
+  \node[noteblock, text width=4.40cm, anchor=north west] at (11.05,4.30)
     {A 512 pixel reference does not fit in the remaining memory. 256 pixels is the
      measured maximum.};
 
-  % ---------------- legend ----------------
-  \node[font=\scriptsize, anchor=north west] (leg) at (9.90,-2.30)
-    {\begin{tabular}{@{}c@{\hspace{3pt}}l@{}}
-       \tikz\fill[draw=black!70,line width=0.4pt,green!12] (0,0) rectangle (0.30,0.20); & input image\\
-       \tikz\fill[draw=black!70,line width=0.4pt,blue!10]  (0,0) rectangle (0.30,0.20); & model block\\
-       \tikz\fill[draw=black!45,line width=0.4pt,red!8]    (0,0) rectangle (0.30,0.20); & note\\
-     \end{tabular}};
-
   \end{tikzpicture}
-  \caption{Inside the generation stage: text conditioning, the image latents, the
-    denoiser with its LoRA adapter, and the four denoising steps.}
+  \caption{Inside the generation stage: Qwen3-4B encodes the prompt once, and the
+    sampler then calls the model four times, once per step. Each call receives the
+    current step number and the same conditioning, and the result is fed back into the
+    loop. The last result is decoded into a 512x512 frame.}
   \label{fig:generation_architecture}
 \end{figure}

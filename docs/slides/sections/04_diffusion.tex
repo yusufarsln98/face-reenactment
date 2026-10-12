@@ -1,10 +1,150 @@
-\section{Method 3: Diffusion Models}
+\section{Method 3: Rectified Flow Models}
 
-\begin{frame}{Method 3: Diffusion Models}
+% --- Slide 1: Rectified Flow Fundamentals ---
+\begin{frame}{Rectified Flow Fundamentals}
+    \vspace*{-0.15cm}
     \begin{center}
-        \vspace{1.5cm}
-        {\Large \textbf{Diffusion Models \& Iterative Denoising}} \\
-        \vspace{0.5cm}
-        {\normalsize \textit{[Placeholder -- Teammate Section]}}
+        \includegraphics[width=\linewidth, keepaspectratio]{diagram_diffusion_process.png}
+    \end{center}
+
+    \small
+    \begin{itemize}
+        \item \textbf{Training.} The image and noise mix on one straight line at a random time.
+        \item \textbf{Generation.} The model predicts the direction, and the sampler steps along it.
+        \item \textbf{Our setup.} A released checkpoint, already step distilled, so four steps are enough.
+    \end{itemize}
+\end{frame}
+
+% --- Slide 2: Architecture, FLUX.2-klein plus LoRA ---
+\begin{frame}{Architecture: FLUX.2-klein and LoRA}
+    \vspace*{-0.15cm}
+    \begin{center}
+        \includegraphics[width=\linewidth, keepaspectratio]{diagram_architecture_lora.png}
+    \end{center}
+
+    \small
+    \begin{itemize}
+        \item \textbf{Flow model.} A 4 billion parameter rectified flow transformer.
+        \item \textbf{Layers.} Five double-stream blocks, then 20 single-stream blocks.
+        \item \textbf{Adapter.} It adapts 80 weights, and the base weights stay frozen.
+    \end{itemize}
+\end{frame}
+
+% --- Slide 3: The Generation Pipeline on 4 GB ---
+\begin{frame}{The Generation Pipeline on 4 GB}
+    \vspace*{-0.25cm}
+    \begin{center}
+        \includegraphics[width=\linewidth, keepaspectratio]{diagram_diffusion_pipeline.png}
+
+        \vspace{-0.05cm}
+
+        \includegraphics[width=\linewidth, keepaspectratio]{diagram_generation_internals.png}
+    \end{center}
+
+    \vspace{-0.1cm}
+    \small
+    \begin{itemize}
+        \item \textbf{Why it fits.} The text encoder runs once on the CPU, then its memory is freed.
+        \item \textbf{Safety gate.} A frame with more than one face is refused, and there is no bypass.
+    \end{itemize}
+\end{frame}
+
+% --- Slide 4: Cleanup Stages and Results ---
+\begin{frame}{Cleanup Stages and Results}
+    \vspace*{-0.15cm}
+    \begin{center}
+        \includegraphics[width=\linewidth, keepaspectratio]{diagram_cleanup_stages.png}
+    \end{center}
+
+    \vspace{0.1cm}
+    \begin{center}
+        {\footnotesize
+        \begin{tabular}{lrrrr}
+            \toprule
+            \textbf{Stage} & \textbf{Face change} & \textbf{Consecutive identity} & \textbf{Identity to portrait} & \textbf{Hair noise} \\
+            \midrule
+            Control & 6.657 & 0.985 & $-0.036$ & 31.600 \\
+            Raw swap & 7.451 & 0.923 & 0.215 & 32.570 \\
+            Restoration & 7.160 & 0.927 & 0.215 & 32.072 \\
+            Flow on raw & 6.666 & 0.939 & 0.215 & 32.060 \\
+            Restoration + flow & 6.630 & 0.938 & 0.215 & 31.731 \\
+            Deflicker & 5.627 & 0.936 & 0.211 & 31.896 \\
+            \bottomrule
+        \end{tabular}}
+    \end{center}
+
+    \vspace{0.05cm}
+    \small
+    \begin{itemize}
+        \item \textbf{Recommended.} Restoration, then optical flow at strength 0.3.
+        \item \textbf{Rejected.} The per-pixel deflicker is cheaper, but it removes real motion too.
+    \end{itemize}
+\end{frame}
+
+% --- Slide 4b: Reassembly and the Boil ---
+\begin{frame}{Reassembly and the Boil}
+    \vspace*{-0.1cm}
+    \begin{center}
+        \begin{minipage}[b]{4.2cm}
+            \centering
+            \animategraphics[autoplay,loop,width=\linewidth]{3.33}{anim_raw/frame_}{000}{031}\\[0.08cm]
+            {\scriptsize Raw assembly}
+        \end{minipage}\hfill
+        \begin{minipage}[b]{4.2cm}
+            \centering
+            \animategraphics[autoplay,loop,width=\linewidth]{3.33}{anim_flow/frame_}{000}{031}\\[0.08cm]
+            {\scriptsize Flow on the raw frames}
+        \end{minipage}\hfill
+        \begin{minipage}[b]{4.2cm}
+            \centering
+            \animategraphics[autoplay,loop,width=\linewidth]{3.33}{anim_chain/frame_}{000}{031}\\[0.08cm]
+            {\scriptsize Restoration + flow}
+        \end{minipage}
+    \end{center}
+
+    \vspace{0.1cm}
+    \small
+    \begin{itemize}
+        \item \textbf{Reassembly.} H.264 at 29.969 fps, with the original audio muxed back.
+        \item \textbf{Watch the boil.} It is clear in the first clip and gone in the last one.
+    \end{itemize}
+\end{frame}
+
+% --- Slide 5: Adapter Versions and Failure Analysis ---
+\begin{frame}{Adapter Versions and Failure Analysis}
+    \vspace*{-0.2cm}
+    \begin{columns}[T]
+        \begin{column}{0.46\textwidth}
+            \centering
+            {\footnotesize
+            \begin{tabular}{lll}
+                \toprule
+                 & \textbf{v1} & \textbf{v1.1} \\
+                \midrule
+                Seconds per frame & 16.34 & about 199 \\
+                Peak VRAM & 3.60 GiB & \textbf{4.68 GiB} \\
+                Adapter rank & 128 & \textbf{512} \\
+                96 frames & 26 min & about 5.3 h \\
+                \bottomrule
+            \end{tabular}}
+        \end{column}
+
+        \begin{column}{0.50\textwidth}
+            \small
+            \begin{itemize}
+                \item \textbf{Measured.} Only v1 ran the metric script.
+                \item \textbf{Memory.} v1.1 went past the card, 12x slower.
+                \item \textbf{Judgement.} We preferred v1 by eye, so the clip kept v1.
+                \item \textbf{Tail.} The worst frames still jump.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+
+    \vspace{-0.1cm}
+    \begin{center}
+        \includegraphics[width=\linewidth, keepaspectratio]{faceswap_lora_compare_grid_0270.png}
+
+        \vspace{-0.1cm}
+        {\scriptsize Five columns: input body crop, v1, v1.1 with prompt A, v1.1 with prompt B, and the reference portrait.}
     \end{center}
 \end{frame}
