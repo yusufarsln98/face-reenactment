@@ -51,3 +51,7 @@ first-order-model/
 
 # Intermediate renders of the slide diagrams; the PNG is the output
 docs/slides/figures_src/*.pdf
+
+# Large run artifacts of the rectified-flow workstream
+rectified_flow/out/
+rectified_flow/final_report/

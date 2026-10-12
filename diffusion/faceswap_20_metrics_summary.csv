@@ -1,7 +1,0 @@
-stage,frames,face_change_mean,face_change_p95,consecutive_identity_mean,identity_to_portrait_mean,hair_temporal_noise_mean
-source (control),96,6.6565,12.3488,0.9852,-0.0356,31.5999
-raw head swap,96,7.451,17.3794,0.9228,0.2153,32.5703
-gfpgan restored,96,7.1602,16.2097,0.9273,0.2153,32.0721
-temporal flow,96,6.6663,15.6581,0.9391,0.2148,32.0603
-restoration then flow (recommended),96,6.6303,15.2802,0.9377,0.2152,31.7306
-deflicker (alt),96,5.6269,12.665,0.9357,0.2106,31.896
