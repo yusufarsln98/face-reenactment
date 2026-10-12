@@ -1,0 +1,120 @@
+% Section 2: autoencoder face swap with one Encoder and two Decoders.
+% Text is taken word for word from the autoencoder report of the source document.
+
+\section{Autoencoders}
+
+\subsection{Introduction \& Problem Definition}
+The goal of our project is swapping faces between two members of the group while keeping the source identity, regenarate the target video with source’s mimic and movements meanwhile trying to keep the video’s quality. This document will explain one of there alternative architectures: autoencoders.
+
+We first decided to build a small auto encoder first by ourselves before trying pretrained models to experience and learn basics. We then tried pretrained face-swapping models and compared their outputs with our own approach. We covered full process, from preparing the images and training a model to generating videos and looking closely at what worked and what did not.
+
+\subsection{Dataset Preparation \& Preprocessing}
+\subsubsection{Data collection and frame extraction}
+We recorded short videos of Person A and Person We saved every fifth frame instead of every frame, in order to avoid collecting too many nearly identical images.
+
+\subsubsection{Face detection and image preparation}
+Next, we detected faces with OpenCV's Haar Cascade classifier. We converted frames to grayscale for detection. We also added a 25\% margin around each face before cropping, so the images included some surrounding facial features.
+
+\begin{table}[tb]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}l r r@{}}
+    \toprule
+    Dataset & Prepared face images & Resolution \\
+    \midrule
+    Person A & 100 & 128 $\times$ 128 \\
+    Person B & 138 & 128 $\times$ 128 \\
+    Total & 238 & 128 $\times$ 128 \\
+    \bottomrule
+  \end{tabular}
+  \caption*{Table: Dataset}
+\end{table}
+
+Images were resized to 128 $\times$ 128 pixels. During training, PyTorch's ToTensor transformation scaled the pixel values to the 0--1
+
+\subsection{Autoencoder Architecture}
+We built the model using one Encoder and two separate Decoders. Decoder A was trained on Person A's images and Decoder B on Person B's. The Decoders had the same design, but they learned their own parameters.
+
+The Encoder had four convolutional layers. The Decoder reversed this process with four transposed-convolution layers. We used Sigmoid activation kept the output pixel values between 0 and 1.
+
+First, we sent encoders’s representation to the Decoder for the same person to reconstruct the input face. To try face swapping, secondly, we used the other person's Decoder: A through Decoder B, and B through Decoder A.
+
+\subsection{Model Training}
+In each epoch, we first trained on Person A's images with Decoder A and then on Person B's images with Decoder B. For each run, the model calculated the reconstruction error, updated the shared Encoder and the relevant Decoder.
+
+We trained for 50 epochs and saved the model weights. We then loaded those weights and continued for another 100 epochs.
+
+\begin{table}[tb]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}l r r@{}}
+    \toprule
+    Epoch & Person A MSE & Person B MSE \\
+    \midrule
+    146 & 0.003046 & 0.001939 \\
+    147 & 0.003013 & 0.001929 \\
+    148 & 0.003014 & 0.001905 \\
+    149 & 0.002996 & 0.001882 \\
+    150 & 0.002935 & 0.001866 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Recorded training results}
+\end{table}
+
+At epoch 150, Person A's average training MSE was 0.002935 and Person B's was 0.001866.
+
+\subsection{Experiments \& Results}
+\subsubsection{Video generation and comparison}
+We generated videos after both 50 and 150 epochs. We tested A $\rightarrow$ B and B $\rightarrow$ A using generate\_video.py and generate\_video\_150.py.
+
+\begin{table}[tb]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}l l l@{}}
+    \toprule
+    Experiment & A $\rightarrow$ B output & B $\rightarrow$ A output \\
+    \midrule
+    50 epochs & deepfake\_A\_to\_B.mp4 & deepfake\_B\_to\_A.mp4 \\
+    150 epochs & deepfake\_150\_A\_to\_B.mp4 & deepfake\_150\_B\_to\_A.mp4 \\
+    \bottomrule
+  \end{tabular}
+  \caption*{Table: Experiments}
+\end{table}
+
+\subsubsection{Observations}
+When we compare the videos we could not see a clear improvement between 50 and 150 epochs. In addition to that, the generated A $\rightarrow$ B face did not look like Person B, and the B $\rightarrow$ A result did not look like Person A. In other words, our model was learning reconstruction but not performing the identity transfer we wanted.
+
+We think the main issue was the training objective. The model learned to recreate the original face instead of swapping it with another face.Our small dataset and may also have played a part, although we did not test those factors separately. This unsuccessful experiment helped us decide what to try next.
+
+\subsection{Experiments with Pretrained Face-Swapping Models}
+After the autoencoder experiments, we tested three pretrained models in FaceFusion: HyperSwap 1A 256, InSwapper 128 and SimSwap 256. We used a source face image and a target video, with the source providing the identity and the target providing the expressions and movement. We ran the models for inference and did not retrain them
+
+\begin{table}[tb]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}l r r r@{}}
+    \toprule
+    Model & Output size & Frames & Duration \\
+    \midrule
+    HyperSwap 1A 256 & 576 $\times$ 1024 & 576 & \textasciitilde{}19.25 s \\
+    InSwapper 128 & 576 $\times$ 1024 & 576 & \textasciitilde{}19.25 s \\
+    SimSwap 256 & 576 $\times$ 1024 & 576 & \textasciitilde{}19.25 s \\
+    \bottomrule
+  \end{tabular}
+  \caption*{Table: Pretrained models}
+\end{table}
+
+HyperSwap and InSwapper looked fairly natural and gave similar results. SimSwap followed the facial movements too, but we noticed more visible differences around the eyes, the middle of the face and the skin texture.
+
+This was a visual comparison, but it was clear that the pretrained models gave more promising results than our own autoencoder.
+
+\subsection{Evaluation \& Lessons Learned}
+\subsubsection{Overall evaluation}
+Training and producing videos was not successfull, however. FaceFusion gave better results with HyperSwap and InSwapper. For us, the difference showed how important it is to use a pretrained model for a spesific task.
+
+We had only 100 images of Person A and 138 of Person B, it was a limitation.
+
+\subsubsection{Lessons learned}
+The biggest lesson was that a low loss does not mean a usable result. Our model was getting better in reconstructuring faces but not good at the same as swapping the faces. Training for another 100 epochs did not fix this.
+
+As a sumary, we learned much more from the project than how to run a face-swapping tool. Building our own model helped us understand preprocessing, training and evaluation. Using pretrained models afterwards, gave us a chance to compare how it would improve the result
