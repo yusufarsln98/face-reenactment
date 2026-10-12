@@ -1,14 +1,16 @@
-% Section 3: GAN and FOMM.
+% Section 3: GAN background and the keypoint-based FOMM method.
 % Facts come from the six notes under fomm/notes/ and from the checked fact sheet.
 % The old slides are not used where the fact check corrected them.
 % Figure inputs are relative to docs/report/.
 
-\section{GAN \& FOMM}
+\section{GAN Background and Keypoint-based FOMM}
 
 A generator is like a painter who draws faces. A discriminator is like an expert
 who judges each face as real or fake and teaches the painter. This game cannot
 follow orders, however. For reenactment we must keep one identity and copy the
-motion from a video, so we used the First Order Motion Model (FOMM).
+motion from a video. We used the First Order Motion Model (FOMM). FOMM is a
+keypoint-based method, and the released configuration trains no adversarial
+loss.
 
 \subsection{Standard GANs}
 A standard GAN holds two networks. The generator $G$ reads a noise vector $z$
@@ -53,20 +55,29 @@ detector during training, so it needs no keypoint labels.
 The \textbf{dense motion network} turns the sparse keypoints into a dense motion
 field (optical flow) and an occlusion map with values between 0 and 1.
 
-The \textbf{generator} warps the source features with the flow. The code
-multiplies the warped features by the occlusion map
-(\texttt{out = out * occlusion\_map}). Where the map is near 0, the warped
-pixels lose their weight and the decoder fills the area from learned face priors
-(inpainting).
+The \textbf{generator} encodes the source image into features and warps these
+features with the flow. The code multiplies the warped features by the occlusion
+map (\texttt{out = out * occlusion\_map}). Where the map is near 0, the warped
+features lose their weight, and the decoder reconstructs that area from learned
+appearance priors. The decoder produces the whole output frame from the weighted
+features.
 
 Each frame is processed on its own. No state passes from frame to frame (no
 recurrence).
 
+This configuration trains no adversarial loss. \texttt{vox-256.yaml} sets
+\texttt{generator\_gan: 0}. The training loop then skips the discriminator
+update completely, and the feature-matching loss never runs, although its
+weights are not zero. The active generator losses are perceptual
+reconstruction, equivariance value, and equivariance Jacobian.
+
 \subsubsection{Occlusion and inpainting}
 A closed mouth or a turned head reveals pixels that do not exist in the source
-photo (self-occlusion). Where $O$ is near 1, the pixels come from the source.
-Where $O$ is near 0, the network draws the area itself from the training-set
-average (Figure~\ref{fig:fomm_occlusion}).
+photo (self-occlusion). The occlusion map $O$ is a learned per-pixel weight on
+the warped features. Where $O$ is near 0, the model trusts the warped features
+less, and the decoder fills more of the area from learned appearance priors
+(Figure~\ref{fig:fomm_occlusion}). The decoder does not copy a literal average
+tooth image.
 
 These are the failure modes we saw. Rare personal details are lost in inpainted
 areas. Very large head turns, about 45 degrees or more, leave blurry patches.
@@ -106,28 +117,31 @@ Table~\ref{tab:fomm_run} lists the setup and the output.
 \end{table}
 
 \subsection{Failure mode: braces}
-The VoxCeleb training data has no braces, so the mouth area should lose them
-when inpainting starts. Our frames confirm this (Table~\ref{tab:fomm_braces}).
+The braces disappear in some output frames (Table~\ref{tab:fomm_braces}). We
+treat the cause as a hypothesis: the training videos may show no braces, so the
+learned appearance priors cannot reconstruct them. We have no direct evidence
+for this hypothesis. The repository holds no analysis of the dataset content,
+and the official VoxCeleb description states no such exclusion.
 
 \begin{table}[tb]
   \centering
   \footnotesize
   \begin{tabular}{@{}r r l l@{}}
     \toprule
-    Frame & Time & Driving mouth & Active path and result \\
+    Frame & Time & Driving mouth & Result (visual reading) \\
     \midrule
-    10 & 0.3 s & small shift & warping, $O\approx1$: braces kept \\
+    10 & 0.3 s & small shift & braces kept \\
     195 & 6.5 s & lips close & mouth hidden \\
-    288 & 9.6 s & wide smile & inpainting, $O\approx0$: plain teeth \\
+    288 & 9.6 s & wide smile & braces lost, teeth plain \\
     \bottomrule
   \end{tabular}
-  \caption{The braces test: the active path decides where the mouth pixels come
-    from.}
+  \caption{The braces test: three frames and our visual reading of the output.
+    We stored no occlusion measurements for these frames.}
   \label{tab:fomm_braces}
 \end{table}
 
-The active path decides which pixels appear: warped areas keep the pixels of the
-person, and inpainted areas follow the training data. FOMM gave the project a
-fast per-frame method. Identity details survive only in warped areas, and rare
-details such as braces are lost as soon as inpainting starts. There is no memory
-across frames, so the method cannot repair a frame from its neighbours.
+FOMM gave the project a fast per-frame method. Every output frame comes from
+the decoder, which reads the occlusion-weighted warped features. Rare details
+such as braces disappear in some outputs, and we treat the cause as a
+hypothesis. There is no memory across frames, so the method cannot repair a
+frame from its neighbours.

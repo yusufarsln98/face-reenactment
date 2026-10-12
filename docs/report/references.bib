@@ -1,0 +1,186 @@
+% References for the report. Each entry is a source that the report text names
+% or uses. A field marked TODO must be completed before the submission.
+% The chapters name their sources in the text, so the list is printed with
+% \nocite{*} in main.tex until \cite keys are added.
+
+% Named in Section 2: OpenCV's Haar Cascade classifier.
+@article{bradski2000opencv,
+  author  = {Bradski, Gary},
+  title   = {The OpenCV Library},
+  journal = {Dr. Dobb's Journal of Software Tools},
+  year    = {2000},
+}
+
+% Named in Section 6: the signed provenance and edit-history manifest.
+@misc{c2pa,
+  author       = {Coalition for Content Provenance and Authenticity},
+  title        = {C2PA Technical Specification},
+  year         = {\textbf{TODO: the specification version and its year}},
+  howpublished = {\textbf{TODO: the specification URL}},
+}
+
+% Named in Section 2: the SimSwap 256 model from FaceFusion.
+@inproceedings{chen2020simswap,
+  author    = {Chen, Renwang and Chen, Xuanhong and Ni, Bingbing and Ge, Yanhao},
+  title     = {SimSwap: An Efficient Framework For High Fidelity Face Swapping},
+  booktitle = {ACM International Conference on Multimedia (ACM MM)},
+  year      = {2020},
+}
+
+% Used in Section 2: the tool that ran the three pretrained face-swap models.
+@misc{facefusion,
+  author       = {\textbf{TODO: the FaceFusion authors}},
+  title        = {FaceFusion: face swapping and enhancement tool},
+  year         = {\textbf{TODO: the version we used and its release date}},
+  howpublished = {\url{https://github.com/facefusion/facefusion}},
+  note         = {The run used the HyperSwap 1A 256, InSwapper 128 and SimSwap
+                  256 models. \textbf{TODO: the model card URL for HyperSwap 1A
+                  256.}},
+}
+
+% Used in Section 4: the released rectified flow generator.
+@misc{flux2,
+  author       = {Black Forest Labs},
+  title        = {FLUX.2 model family},
+  year         = {\textbf{TODO: the release date of the FLUX.2-klein-4B checkpoint}},
+  howpublished = {\textbf{TODO: the model card URL}},
+}
+
+% Named in Section 6: the frequency cues reported in the literature.
+@inproceedings{frank2020frequency,
+  author    = {Frank, Joel and Eisenhofer, Thorsten and Sch{\"o}nherr, Lea and
+               Fischer, Asja and Kolossa, Dorothea and Holz, Thorsten},
+  title     = {Leveraging Frequency Analysis for Deep Fake Image Recognition},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2020},
+}
+
+% Named in Section 3: the standard GAN training game.
+@inproceedings{goodfellow2014gan,
+  author    = {Goodfellow, Ian and Pouget-Abadie, Jean and Mirza, Mehdi and
+               Xu, Bing and Warde-Farley, David and Ozair, Sherjil and
+               Courville, Aaron and Bengio, Yoshua},
+  title     = {Generative Adversarial Nets},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2014},
+}
+
+% Named in Sections 1 and 4: the LoRA adapter.
+@inproceedings{hu2021lora,
+  author    = {Hu, Edward J. and Shen, Yelong and Wallis, Phillip and
+               Allen-Zhu, Zeyuan and Li, Yuanzhi and Wang, Shean and
+               Wang, Lu and Chen, Weizhu},
+  title     = {LoRA: Low-Rank Adaptation of Large Language Models},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2022},
+}
+
+% Named in Section 2: the InSwapper 128 model from FaceFusion.
+@misc{insightface,
+  author       = {\textbf{TODO: the InsightFace authors}},
+  title        = {InsightFace: 2D and 3D Face Analysis Project},
+  year         = {\textbf{TODO: the release date of the InSwapper 128 model}},
+  howpublished = {\url{https://github.com/deepinsight/insightface}},
+  note         = {The report names the InSwapper 128 model from this project.},
+}
+
+% Named in Section 6: the blinking cue reported in the literature.
+@inproceedings{li2018blinking,
+  author    = {Li, Yuezun and Chang, Ming-Ching and Lyu, Siwei},
+  title     = {In Ictu Oculi: Exposing AI Created Fake Videos by Detecting Eye
+               Blinking},
+  booktitle = {IEEE International Workshop on Information Forensics and Security
+               (WIFS)},
+  year      = {2018},
+}
+
+% Used in Section 4: the rectified flow training and sampling method.
+@article{liu2022rectifiedflow,
+  author  = {Liu, Xingchao and Gong, Chengyue and Liu, Qiang},
+  title   = {Flow Straight and Fast: Learning to Generate and Transfer Data with
+             Rectified Flow},
+  journal = {arXiv preprint},
+  year    = {2022},
+  note    = {\textbf{TODO: the arXiv number and the published venue, if any.}},
+}
+
+% Named in Section 3: the VoxCeleb dataset behind the FOMM checkpoint.
+@inproceedings{nagrani2017voxceleb,
+  author    = {Nagrani, Arsha and Chung, Joon Son and Zisserman, Andrew},
+  title     = {VoxCeleb: A Large-Scale Speaker Identification Dataset},
+  booktitle = {Interspeech},
+  year      = {2017},
+}
+
+% Named in Section 3: the code class Hourglass.
+@inproceedings{newell2016hourglass,
+  author    = {Newell, Alejandro and Yang, Kaiyu and Deng, Jia},
+  title     = {Stacked Hourglass Networks for Human Pose Estimation},
+  booktitle = {European Conference on Computer Vision (ECCV)},
+  year      = {2016},
+}
+
+% Named in Section 2: PyTorch's ToTensor transformation.
+@inproceedings{paszke2019pytorch,
+  author    = {Paszke, Adam and Gross, Sam and Massa, Francisco and Lerer, Adam
+               and Bradbury, James and Chanan, Gregory and Killeen, Trevor and
+               Lin, Zeming and Gimelshein, Natalia and Antiga, Luca and others},
+  title     = {PyTorch: An Imperative Style, High-Performance Deep Learning
+               Library},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2019},
+}
+
+% Named in Section 6: the rPPG cue reported in the literature.
+@inproceedings{qi2020deeprhythm,
+  author    = {Qi, Hua and Guo, Qing and Juefei-Xu, Felix and Xie, Xiaofei and
+               Ma, Lei and Feng, Wei and Liu, Yang and Zhao, Jianjun},
+  title     = {DeepRhythm: Exposing DeepFakes with Attentional Visual Heartbeat
+               Rhythms},
+  booktitle = {ACM International Conference on Multimedia (ACM MM)},
+  year      = {2020},
+}
+
+% Used in Section 4: the text encoder of the generation stage.
+@misc{qwen3,
+  author       = {Qwen Team},
+  title        = {Qwen3 Technical Report},
+  year         = {2025},
+  howpublished = {\textbf{TODO: the arXiv number or the model card URL}},
+}
+
+% Named in Section 3: the U-Net shape of the keypoint detector.
+@inproceedings{ronneberger2015unet,
+  author    = {Ronneberger, Olaf and Fischer, Philipp and Brox, Thomas},
+  title     = {U-Net: Convolutional Networks for Biomedical Image Segmentation},
+  booktitle = {Medical Image Computing and Computer-Assisted Intervention
+               (MICCAI)},
+  year      = {2015},
+}
+
+% Named in Section 3: the First Order Motion Model.
+@inproceedings{siarohin2019fomm,
+  author    = {Siarohin, Aliaksandr and Lathuili{\`e}re, St{\'e}phane and
+               Tulyakov, Sergey and Ricci, Elisa and Sebe, Nicu},
+  title     = {First Order Motion Model for Image Animation},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2019},
+}
+
+% Named in Section 3: the earlier method that FOMM follows.
+@inproceedings{siarohin2019monkeynet,
+  author    = {Siarohin, Aliaksandr and Lathuili{\`e}re, St{\'e}phane and
+               Tulyakov, Sergey and Ricci, Elisa and Sebe, Nicu},
+  title     = {Animating Arbitrary Objects via Deep Motion Transfer},
+  booktitle = {IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2019},
+}
+
+% Named in Section 4: the face restoration stage.
+@inproceedings{wang2021gfpgan,
+  author    = {Wang, Xintao and Li, Yu and Zhang, Honglun and Shan, Ying},
+  title     = {GFPGAN: Towards Real-World Blind Face Restoration with Generative
+               Facial Prior},
+  booktitle = {IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2021},
+}

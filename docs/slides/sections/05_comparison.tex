@@ -1,12 +1,33 @@
 \section{Comparative Analysis}
 
 \begin{frame}{Comparative Analysis}
-    \begin{center}
-        \vspace{1.5cm}
-        {\Large \textbf{Comparative Analysis}} \\
-        \vspace{0.3cm}
-        {\large Autoencoders vs. GANs (FOMM) vs. Rectified Flow Models} \\
-        \vspace{0.5cm}
-        {\normalsize \textit{[Placeholder -- Team Synthesis]}}
-    \end{center}
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{4pt}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{@{}p{0.13\textwidth} p{0.26\textwidth} p{0.24\textwidth} p{0.27\textwidth}@{}}
+        \toprule
+        & \textbf{Autoencoder} & \textbf{FOMM (Keypoints)} & \textbf{Rectified Flow} \\
+        \midrule
+        \textbf{What it does}
+        & Shared encoder and two decoders; face swap by crossing decoders.
+        & Animates a source photo with 10 unsupervised keypoints and Jacobians.
+        & Head swap with FLUX.2-klein-4B and a LoRA adapter, four steps. \\
+        \addlinespace
+        \textbf{Input}
+        & 238 prepared face images: 100 Person A, 138 Person B, 128 $\times$ 128.
+        & Source portrait 512 $\times$ 512; driving clip 256 $\times$ 256, 320 frames.
+        & Body crop 512 $\times$ 512, selfie portrait 256 $\times$ 256, fixed prompt. \\
+        \addlinespace
+        \textbf{Project result}
+        & Low MSE, but no identity swap; pretrained FaceFusion looked better.
+        & 256 $\times$ 256 clip in about 2.5 min; rare braces vanish.
+        & 96-frame 512 $\times$ 512 clip with audio; identity stays positive. \\
+        \addlinespace
+        \textbf{Main limitation}
+        & MSE reconstructs the input; it does not measure swap quality.
+        & Inpainting follows the training average; no memory across frames.
+        & Per-frame generation boils; the tail still jumps. \\
+        \bottomrule
+    \end{tabular}
 \end{frame}

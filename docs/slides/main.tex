@@ -76,7 +76,7 @@
 
 % Presentation Metadata
 \title[Face Reenactment]{Exploring DeepFakes: Face Reenactment}
-\subtitle{Comparative Architecture Analysis: Autoencoders, GANs, FOMM \& Rectified Flow}
+\subtitle{Comparative Architecture Analysis: Autoencoders, Keypoint-Based FOMM \& Rectified Flow}
 \author[Arslan et al.]{Yusuf Arslan \and Erdem Çelikel \and Mehmet Yavuz Katrancı}
 \institute[Dept. of Computer Science]{Deep Learning \& Computer Vision}
 \date{\today}
@@ -112,11 +112,9 @@
 \input{sections/02_5_ae_lessons_learned.tex}
 
 % -------------------------------------------------------------
-% 3. Method 2: GANs & First Order Motion Model (Detailed)
+% 3. Method 2: Keypoint-Based FOMM (First Order Motion Model, Detailed)
 % -------------------------------------------------------------
-\input{sections/03_1_gan_fundamentals.tex}
 \input{sections/03_2_fomm_architecture.tex}
-\input{sections/03_3_occlusion_inpainting.tex}
 \input{sections/03_4_experiments_results.tex}
 \input{sections/03_5_failure_mode_analysis.tex}
 
@@ -134,5 +132,14 @@
 % 6. Ethics & Conclusion
 % -------------------------------------------------------------
 \input{sections/06_ethics_conclusion.tex}
+
+% -------------------------------------------------------------
+% 7. Backup Slides (Appendix, separate frame numbering)
+% -------------------------------------------------------------
+\appendix
+\section{Backup}
+\input{sections/03_1_gan_fundamentals.tex}
+\input{sections/07_backup.tex}
+\input{sections/03_3_occlusion_inpainting.tex}
 
 \end{document}

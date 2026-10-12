@@ -22,18 +22,32 @@
 \renewcommand{\floatpagefraction}{0.7}
 
 \title{Exploring DeepFakes: Face Reenactment Report}
-\author{}
-\date{\today}
+\author{%
+  \textbf{Yusuf Arslan, Erdem Çelik, Mehmet Yavuz Katrancı, Nahit Eren Bulut}
+}
+\date{\textbf{12.10.2026}}
 
 \begin{document}
 
 \maketitle
 
+\input{sections/01_introduction}
 \input{sections/02_autoencoders}
 \input{sections/03_gan_fomm}
 \input{sections/04_rectified_flow}
+\input{sections/05_comparison}
+\input{sections/06_ethics_limitations}
+\input{sections/07_conclusion}
+\input{sections/08_teamwork}
 
 % Report content will be added here
+
+% The reference list reads docs/report/references.bib.
+% It is disabled at the author's request: the chapters name their sources in
+% the text instead. The .bib file stays on disk for a later switch back.
+% \nocite{*}
+% \bibliographystyle{plain}
+% \bibliography{references}
 
 \end{document}
 

@@ -2,13 +2,15 @@
 \begin{frame}{Custom Autoencoder: Observations \& Failure Analysis}
     \begin{columns}[c]
         \begin{column}{0.50\textwidth}
-            \begin{alertblock}{Why Did Face Swapping Fail?}
+            \begin{alertblock}{Observations \& Hypotheses}
                 \small
                 \begin{itemize}
-                    \item \textbf{No Visual Progress:} Comparing 50 vs. 150 epochs showed no discernible improvement.
-                    \item \textbf{Reconstruction vs. Identity:} The A $\to$ B face did not look like Person B, and B $\to$ A did not look like Person A.
-                    \item \textbf{Objective Flaw:} Pixel-wise MSE trained the model to recreate the original face, not transfer identity.
-                    \item \textbf{Dataset Size:} 238 total images were insufficient to learn a generalized, disentangled latent space.
+                    \item \textbf{Observation.} The swap failed in this run: the A $\to$ B face did not look like Person B, and B $\to$ A did not look like Person A.
+                    \item \textbf{Observation.} The 50 and 150 epoch videos showed no clear improvement.
+                    \item \textbf{Hypothesis.} Pixel-wise MSE may train the model to recreate the original face, not to swap it.
+                    \item \textbf{Hypothesis.} 238 training images may be too few.
+                    \item \textbf{Hypothesis.} The shared latent code may entangle identity with pose and expression.
+                    \item \textbf{Status.} We did not test these causes separately. The loss still fell slowly in the last five recorded epochs, so five points alone do not prove steady convergence.
                 \end{itemize}
             \end{alertblock}
         \end{column}
@@ -23,12 +25,12 @@
             \scriptsize \textit{Comparison B $\to$ A (Input $\mid$ 50ep $\mid$ 150ep)}
 
             \vspace{0.1cm}
-            \href{https://youtu.be/placeholder}{\scriptsize \underline{\textcolor{primaryNavy}{[comparison\_B\_to\_A.mp4 Video Link]}}}
+            \href{videos/comparison_B_to_A.mp4}{\scriptsize \underline{\textcolor{primaryNavy}{[comparison\_B\_to\_A.mp4]}}}
 
             \vspace{0.15cm}
             \begin{block}{Key Takeaway}
                 \scriptsize
-                Shared latent code entangled identity with facial pose and expression.
+                Possible cause: the shared latent code entangled identity with facial pose and expression. This was not tested separately.
             \end{block}
         \end{column}
     \end{columns}

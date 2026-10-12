@@ -1,0 +1,53 @@
+% Section 5: comparison of the three methods.
+% Every value comes from Sections 2, 3 and 4; no new measurement.
+
+\section{Comparison}
+
+The three methods attacked the same task from different sides.
+Table~\ref{tab:comparison} lists what each one does, what it needs as input, what
+it produced in this project, and its main limitation.
+
+\begin{table}[tb]
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{@{}p{0.14\textwidth} p{0.25\textwidth} p{0.25\textwidth} p{0.25\textwidth}@{}}
+    \toprule
+    & \textbf{Autoencoder} & \textbf{FOMM} & \textbf{Rectified flow} \\
+    \midrule
+    What it does
+    & One shared encoder with one decoder per person; a swap means the encoder of one person and the decoder of the other.
+    & Animates a source photo with 10 keypoints, one Jacobian per keypoint, a motion field, and an occlusion map.
+    & Head swap with a released rectified flow model and a LoRA adapter in four sampling steps, then restoration, smoothing and reassembly. \\
+    \midrule
+    What it needs
+    & 238 prepared face images, 100 of Person A and 138 of Person B, at 128 $\times$ 128.
+    & A source portrait of 512 $\times$ 512 and a driving clip of 256 $\times$ 256 with 320 frames at 29.97 FPS.
+    & A 256 $\times$ 256 selfie portrait, 512 $\times$ 512 body frames, a fixed prompt of 409 characters, and one laptop with a 4 GB GPU and 8 GB of RAM. \\
+    \midrule
+    What it produced
+    & Both directions (A $\rightarrow$ B and B $\rightarrow$ A) after 50 and 150 epochs. The loss was low, with MSE 0.002935 and 0.001866 at epoch 150, but the output face did not take the other identity. The pretrained FaceFusion models looked better.
+    & A 256 $\times$ 256 clip of 320 frames and 10.7 s in about 2.5 minutes on CPU. Head turns and blinks transferred smoothly, but braces disappeared in some frames.
+    & A 96-frame 512 $\times$ 512 clip of 3.203 s with the original audio. The identity-to-portrait value was about 0.215 against $-0.0356$ for the control. \\
+    \midrule
+    Main limitation
+    & The reconstruction objective teaches the model to rebuild the input, not to transfer an identity, and the dataset was small.
+    & Inpainting falls back on learned appearance priors, so rare personal details are lost and large head turns blur. No state passes from frame to frame.
+    & Every frame is generated on its own, so the face boils; smoothing reduces the boil, but the worst frames still jump. \\
+    \bottomrule
+  \end{tabular}
+  \caption{The three methods: what each one does, its input, its result in this
+    project, and its main limitation.}
+  \label{tab:comparison}
+\end{table}
+
+The table shows three different trade-offs. The autoencoder needed our own
+training data and still missed the identity transfer, and our own model stayed
+behind the pretrained FaceFusion models. FOMM gave a fast per-frame method and
+moved head turns and blinks smoothly, but its inpainting lost rare details and
+it keeps no memory across frames. The rectified flow pipeline cost 16.3 seconds
+per frame in the generation stage, and the worst frames still jump, yet it
+produced a full 512 $\times$ 512 clip with the original audio on the hardware we
+had. We would recommend that pipeline, with restoration followed by
+optical-flow smoothing at strength 0.3. Its identity-to-portrait value stayed
+above the control level, and the full clip ran on one laptop with a 4 GB GPU.

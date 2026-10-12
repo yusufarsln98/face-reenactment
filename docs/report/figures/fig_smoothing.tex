@@ -55,10 +55,13 @@
   % ---------------- notes ----------------
   \node[noteblock, text width=6.90cm, anchor=north west] at (0.34,-2.95)
     {A per-pixel deflicker is cheaper. It averages each pixel with its temporal
-     neighbours, and it removes real motion as well as the boil.};
+     neighbours. The face change falls; the value is a temporal change indicator
+     with no calibrated threshold, so the drop alone does not prove that real
+     motion was removed.};
   \node[noteblock, text width=7.20cm, anchor=north west] at (7.90,-2.75)
     {At strength 0.3 the result matches the motion level of the unswapped footage.
-     At 0.6 the pass sits below it, which is over-smoothing.};
+     At 0.6 the pass sits below it, but 0.6 is the setting that was used, not
+     proof of over-smoothing.};
 
   \end{tikzpicture}
   \caption{The temporal smoothing stage. Each frame is compared with its two

@@ -72,7 +72,7 @@
   \draw[flow] (final.east) -- (dec.west);
   \draw[flow] (dec.east) -- (frame.west);
 
-  % the loop back: the output re-enters the latent state
+  % the loop back: the predicted direction drives one Euler update, then the state re-enters the model
   \draw[flow] (10.10,5.46) -- (10.10,3.89) -- (4.75,3.89) -- (state.south);
 
   % the step counter sits on the loop, and the step number enters the model
@@ -98,8 +98,10 @@
 
   % ---------------- notes ----------------
   \node[noteblock, text width=4.90cm, anchor=north west] at (0.15,2.19)
-    {The LoRA changes 99.5 percent of the pixels against the unadapted model, so it
-     changes the task, not the style.};
+    {The LoRA changes 99.5 percent of the pixels against the unadapted model, measured
+     over the RGB channels. A large share of pixels changed, but a style change also
+     moves many pixels, so this number alone does not show whether the change is a task
+     change or a style change.};
   \node[noteblock, text width=4.90cm, anchor=north west] at (5.35,2.19)
     {Four steps are enough. The base model is step distilled. Eight steps looked
      the same.};
@@ -110,7 +112,8 @@
   \end{tikzpicture}
   \caption{Inside the generation stage: Qwen3-4B encodes the prompt once, and the
     sampler then calls the model four times, once per step. Each call receives the
-    current step number and the same conditioning, and the result is fed back into the
-    loop. The last result is decoded into a 512x512 frame.}
+    current step number and the same conditioning, and each predicted direction drives
+    one Euler update of the latent. The final updated latent is decoded into a 512x512
+    frame.}
   \label{fig:generation_architecture}
 \end{figure}

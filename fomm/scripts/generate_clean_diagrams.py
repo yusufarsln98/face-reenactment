@@ -99,7 +99,7 @@ digraph G {
 
     Warp [label="3. Feature Warping\n(Warps source face)", fillcolor="#ffffff"];
 
-    Gen [label="4. Inpainting Generator\n(Fills in teeth & mouth)", fillcolor="#f3f4f6"];
+    Gen [label="4. Generator\n(Fills occluded areas from priors)", fillcolor="#f3f4f6"];
 
     Out [label="Synthesized Output\n(Final reenacted video frame)", fillcolor="#ffffff", penwidth=2.0];
 
@@ -136,7 +136,7 @@ digraph G {
         Prior  [label="Learned Face Patterns\n(Knowledge of what teeth/eyes look like)", fillcolor="#ffffff"];
     }
 
-    Gen [label="Inpainting Generator\n(Combines visible parts +\ninpaints unseen regions)", fillcolor="#f3f4f6"];
+    Gen [label="Generator\n(Keeps visible parts; fills\nunseen regions from priors)", fillcolor="#f3f4f6"];
 
     Out [label="Synthesized Output\n(Final photorealistic face)", fillcolor="#ffffff", penwidth=2.0];
 

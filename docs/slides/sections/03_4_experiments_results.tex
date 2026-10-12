@@ -1,45 +1,5 @@
 % --- Slide 1: Inference Pipeline Pseudocode ---
-\begin{frame}[fragile]{Inference Pipeline: Python Pseudocode}
-    \begin{columns}[T]
-        \begin{column}{0.56\textwidth}
-            \begin{block}{Frame-by-Frame Execution Loop}
-                \scriptsize
-\begin{verbatim}
-# 1. Extract reference keypoints from source portrait
-kp_source = keypoint_detector(source_image)
-
-# 2. Iterate through driving video frames
-for frame_d in driving_video:
-    # Step 1: Motion tracking
-    kp_driving = keypoint_detector(frame_d)
-
-    # Step 2: Dense motion & occlusion estimation
-    flow, occ = dense_motion_net(kp_source, kp_driving)
-
-    # Step 3: Flow warping & inpainting
-    out_frame = generator(source_image, flow, occ)
-
-    yield out_frame
-\end{verbatim}
-            \end{block}
-        \end{column}
-
-        \begin{column}{0.41\textwidth}
-            \small \textbf{Core Modules}
-            \begin{itemize}
-                \footnotesize
-                \item \texttt{keypoint\_detector}: Extracts 10 unsupervised keypoints.
-                \item \texttt{dense\_motion\_net}: Computes optical flow and occlusion mask.
-                \item \texttt{generator}: Warps source pixels and inpaints mouth/teeth.
-            \end{itemize}
-
-            \vspace{0.1cm}
-            \begin{block}{Architectural Property}
-                \scriptsize \textbf{No Recurrence:} The loop carries no hidden state across frames ($t \to t+1$).
-            \end{block}
-        \end{column}
-    \end{columns}
-\end{frame}
+% Moved to 07_backup.tex (backup material).
 
 % --- Slide 2: Side-by-Side Results & External Video Links ---
 \begin{frame}{Experimental Results: Bella Poarch Benchmark}

@@ -49,25 +49,30 @@
                 \item \textbf{Frame 288 (9.6s) --- Inpainting ($O \approx 0$):}\\
                 Extreme smile triggers inpainting; generator paints generic teeth, erasing braces.
             \end{itemize}
+
+            \scriptsize \textit{$O$ values: visual reading, not a stored measurement.}
         \end{column}
     \end{columns}
 \end{frame}
 
 % --- Slide 3: Root Cause Analysis & Video Links ---
-\begin{frame}{Technical Mechanism: Dual-Path Synthesis}
+\begin{frame}{Technical Mechanism: Feature Warping \& Occlusion}
     \begin{columns}[T]
         \begin{column}{0.50\textwidth}
             \begin{block}{Synthesis Formulation}
                 \scriptsize
-                $$\text{Output} = (\text{Warped } S \odot O) + (G_{\text{inpaint}} \odot (1 - O))$$
+                $$\text{Output} = D\big(W(E(S),\, T) \odot O\big)$$
+                One decoder path: no inpainting branch, no RGB blend.
             \end{block}
             
             \vspace{-0.15cm}
-            \begin{block}{Operational Pathways}
+            \begin{block}{Mechanism Steps}
                 \footnotesize
                 \begin{itemize}
-                    \item \textbf{Warping ($O \approx 1$):} Copies from source $S$, preserving identity details (braces).
-                    \item \textbf{Inpainting ($O \approx 0$):} Under deformation, synthesizes pixels from VoxCeleb average (plain teeth).
+                    \item \textbf{Encode:} the source $S$ becomes features $E(S)$.
+                    \item \textbf{Warp:} the dense flow $T$ moves the features.
+                    \item \textbf{Weight:} the mask $O$ multiplies the warped features.
+                    \item \textbf{Decode:} $D(\cdot)$ renders the whole output frame.
                 \end{itemize}
             \end{block}
         \end{column}
@@ -76,9 +81,9 @@
             \begin{block}{Core Finding}
                 \footnotesize
                 \begin{itemize}
-                    \item Pixel fidelity depends on the active pathway.
-                    \item $O \approx 1$ regions preserve source specifics.
-                    \item $O \approx 0$ regions reflect training dataset bias.
+                    \item At the mouth, the occlusion mask fails ($O \approx 0$).
+                    \item $O \approx 1$ regions keep the warped source details.
+                    \item $O \approx 0$ regions fall back on learned appearance priors.
                 \end{itemize}
             \end{block}
 

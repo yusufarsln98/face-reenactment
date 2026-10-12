@@ -1,3 +1,5 @@
+\section{Method 2: Keypoint-Based FOMM}
+
 % --- Slide 1: FOMM Overview ---
 \begin{frame}{First Order Motion Model (Siarohin et al., NeurIPS 2019)}
     \begin{columns}[c]
@@ -10,6 +12,9 @@
                 \item \textbf{Decoupled Repr.:} Appearance from source $S$; motion from driving $D$.
                 \item \textbf{Domain Agnostic:} Works on human faces, bodies (Tai-Chi), and animals.
             \end{itemize}
+
+            \vspace{0.12cm}
+            \footnotesize \textbf{No adversarial loss:} this project trains FOMM without a discriminator.
         \end{column}
 
         \begin{column}{0.44\textwidth}
@@ -22,57 +27,6 @@
     \end{columns}
 \end{frame}
 
-% --- Slide 2: Motion Representation: 0th vs 1st Order ---
-\begin{frame}{Motion Representation: 0th-Order vs. 1st-Order Motion}
-    \begin{columns}[c]
-        \begin{column}{0.50\textwidth}
-            \small
-            \textbf{How Motion is Represented}
-            \begin{itemize}
-                \item \textbf{0th-Order (Translation Only):}
-                \begin{itemize}
-                    \item Moves points in 2D space $(x, y)$.
-                    \item Cannot stretch skin; movement looks stiff and robotic.
-                \end{itemize}
-                \vspace{0.15cm}
-                \item \textbf{1st-Order (FOMM / Local Affine):}
-                \begin{itemize}
-                    \item Estimates a Jacobian matrix around each point.
-                    \item Captures rotation, scale (open mouth), and shear (skin stretch).
-                \end{itemize}
-            \end{itemize}
-        \end{column}
+% --- Slide 2: Motion Representation moved to 07_backup.tex (backup material). ---
 
-        \begin{column}{0.48\textwidth}
-            \centering
-            \includegraphics[width=\linewidth, height=3.8cm, keepaspectratio]{diagram_facial_motion_order.png}
-        \end{column}
-    \end{columns}
-\end{frame}
-
-% --- Slide 3: The FOMM Pipeline & Core Components ---
-\begin{frame}{FOMM Architectural Pipeline}
-    \begin{center}
-        \includegraphics[width=0.96\linewidth, height=2.6cm, keepaspectratio]{diagram_fomm_pipeline.png}
-    \end{center}
-
-    \vspace{0.1cm}
-
-    \begin{columns}[T]
-        \begin{column}{0.32\textwidth}
-            \begin{block}{1. Keypoint Detector}
-                \scriptsize Hourglass network extracts $K=10$ unsupervised keypoints and Jacobians.
-            \end{block}
-        \end{column}
-        \begin{column}{0.32\textwidth}
-            \begin{block}{2. Dense Motion Network}
-                \scriptsize Combines sparse keypoint motions into dense optical flow ($T$) and mask ($O$).
-            \end{block}
-        \end{column}
-        \begin{column}{0.32\textwidth}
-            \begin{block}{3. Inpainting Generator}
-                \scriptsize Warps source features using flow $T$ and synthesizes occluded areas ($O \approx 0$).
-            \end{block}
-        \end{column}
-    \end{columns}
-\end{frame}
+% --- Slide 3: FOMM Pipeline moved to 07_backup.tex (backup material). ---

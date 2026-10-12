@@ -1,0 +1,61 @@
+% Section 6: ethics and the limits of this project.
+% The limitation facts follow a check of this checkout:
+%   autoencoders/ holds no training code and no weights;
+%   rectified_flow/final_report/ and rectified_flow/out/ are untracked run artifacts,
+%   so the raw run records, the metric CSV and the 96-frame sets are not in the repository;
+%   no FOMM checkpoint is present (fomm/vox-cpk.pth.tar is ignored and absent);
+%   the mean absolute pixel difference helper works on 8-bit pixel values.
+
+\section{Ethics and Limitations}
+
+\subsection{Ethics}
+Face reenactment carries a clear risk of misuse. The same pipeline that makes a
+light-hearted clip can put a real face on words the person never said, and a
+viewer cannot separate the two cases by eye. The risk grows as soon as the
+material leaves the team.
+
+We answer that risk with provenance, with watermarks and with detection
+research. The technical measures limit what a stranger can do with a published
+file.
+
+C2PA is a signed provenance and edit-history manifest. It records which tool
+made a file, what changed it and when, and a signature lets a reader check that
+record. It is not a stamp that exists only at capture time, because an editor
+can add a further manifest entry for each change, and the history then travels
+with the file. C2PA is also not a deepfake detector by itself. The manifest
+reports where a file came from and how it changed; it does not judge whether the
+content is real.
+
+Watermarking is a separate measure. It hides a signal inside the pixels or the
+audio, and the signal travels with the content. A watermark and a C2PA manifest
+do different jobs, so a project can use both.
+
+Research also reports detection cues. Eye blinking follows a rhythm that the
+early face generators did not reproduce (Li et al., 2018). Remote
+photoplethysmography reads a heartbeat signal from small colour changes in the
+skin (Qi et al., 2020). Frequency analysis finds the traces that neural
+upsampling leaves in the image spectrum (Frank et al., 2020). We treat these
+cues as research examples only. This project ran no detection experiment and
+trained no detector, so we report no measurement of our own here.
+
+\subsection{Limitations}
+Our results rest on artifacts that are not all in the repository. The
+autoencoder training code and the trained weights are absent, so that training
+cannot be repeated from this checkout. The Rectified Flow raw run records, the
+metric CSV and the 96-frame sets are absent as well, so the numbers in
+Section 4 cannot be re-derived here. The FOMM checkpoint is absent too, so the
+training history of those weights cannot be verified; the released
+configuration trains no adversarial loss, as Section 3 states.
+
+Two explanations stay unverified. We ran no analysis of the dataset content, so
+the braces explanation in Section 3 stays a hypothesis and not a finding. The
+temporal metric thresholds are not calibrated, so a face change value has no
+absolute reading; only the control level gives it a meaning.
+
+One helper limits what one number can show. The script that reports the mean
+absolute difference converts both images to 8-bit pixel values before the
+subtraction, an 8-bit round trip. The value therefore cannot show a difference
+finer than one 8-bit level.
+
+These limits do not change any measured value. They set the size of each claim
+we make, and we report only what the artifacts support.

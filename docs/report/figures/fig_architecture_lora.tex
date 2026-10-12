@@ -32,10 +32,20 @@
     {\textbf{20 single-stream blocks}\\[1pt]\scriptsize one stream, joint attention};
   \node[block, text width=5.60cm, minimum height=1.10cm, below=0.28cm of ss] (fin)
     {\textbf{final layer}\\[1pt]\scriptsize adaptive layer norm, project to 128 channels};
-  \node[inputblock, text width=5.60cm, minimum height=0.80cm, below=0.28cm of fin] (latout)
-    {\textbf{latent to the decoder}};
-  \foreach \a/\b in {lat/proj, proj/ds, ds/cat, cat/ss, ss/fin, fin/latout}
+  \node[inputblock, text width=5.60cm, minimum height=1.10cm, below=0.28cm of fin] (latout)
+    {\textbf{predicted direction}\\[1pt]\scriptsize the velocity for one update};
+  \node[stageblock, text width=5.60cm, minimum height=1.10cm, below=0.28cm of latout] (upd)
+    {\textbf{scheduler / Euler update}\\[1pt]\scriptsize the sampler moves the latent along the direction};
+  \node[inputblock, text width=5.60cm, minimum height=1.00cm, below=0.28cm of upd] (latupd)
+    {\textbf{updated latent}\\[1pt]\scriptsize the next input, four steps in all};
+  \node[block, text width=5.60cm, minimum height=1.00cm, below=0.28cm of latupd] (dec)
+    {\textbf{VAE decode}\\[1pt]\scriptsize the final latent only};
+  \foreach \a/\b in {lat/proj, proj/ds, ds/cat, cat/ss, ss/fin, fin/latout, latout/upd, upd/latupd, latupd/dec}
     {\draw[flow] (\a.south) -- (\b.north);}
+
+  % the update loop: the updated latent becomes the next input, and only the last one is decoded
+  \draw[feed] (latupd.east) -- ++(0.35,0) |- (latout.east);
+  \node[arrowlab, anchor=west] at ([xshift=0.50cm]latupd.east) {next step, four in all};
 
   % the text encoder enters through joint attention (dashed = conditioning path)
   \node[block, text width=1.70cm, left=0.40cm of cat] (enc)
@@ -97,7 +107,7 @@
     at ([xshift=0.10cm]bA.east) {\textbf{adapter}\\[1pt]rank 128,\\trained};
 
   % ================= notes =================
-  \coordinate (notetop) at ([yshift=-0.35cm]latout.south);
+  \coordinate (notetop) at ([yshift=-0.35cm]dec.south);
   \node[noteblock, text width=2.10cm, anchor=north west] at (0.45,0 |- notetop)
     {This layer stack is the published layout. We did not change it.};
   \node[noteblock, text width=4.40cm, anchor=north west] at (4.425,0 |- notetop)
@@ -110,9 +120,10 @@
 
   \end{tikzpicture}
   \caption{The model path: the latent token is projected to width 3072, passes the
-    double-stream and single-stream blocks, and the final layer returns the latent for the
-    decoder. The text encoder and the timestep embedding enter as conditioning. The bracket
-    on the right marks one weight inside a block, where a small trained adapter sits beside
-    the block's own frozen weight.}
+    double-stream and single-stream blocks, and the final layer predicts a direction, the
+    velocity for one update. The sampler applies the update, and only the final latent
+    reaches the VAE decode. The text encoder and the timestep embedding enter as
+    conditioning. The bracket on the right marks one weight inside a block, where a small
+    trained adapter sits beside the block's own frozen weight.}
   \label{fig:architecture_lora}
 \end{figure}

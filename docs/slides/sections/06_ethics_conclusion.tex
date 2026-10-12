@@ -17,9 +17,10 @@
             \begin{block}{Detection Strategies}
                 \small
                 \begin{itemize}
-                    \item \textbf{Biological signals:} Unnatural blinking and pulse signals (rPPG).
-                    \item \textbf{Frequency artifacts:} High-frequency noise from neural upsampling.
-                    \item \textbf{Watermarking / C2PA:} Cryptographic metadata embedded at capture.
+                    \item \textbf{Blinking and rPPG:} Detection cues reported in the literature; this project ran no such test.
+                    \item \textbf{Frequency artifacts:} Reported in the literature; neural upsampling leaves high-frequency noise.
+                    \item \textbf{Watermarking:} A separate measure, independent of C2PA.
+                    \item \textbf{C2PA:} A signed provenance and edit-history manifest, not only a capture-time stamp. It is not a deepfake detector by itself.
                 \end{itemize}
             \end{block}
         \end{column}
@@ -33,9 +34,10 @@
             \small
             \textbf{Summary}
             \begin{itemize}
-                \item Animates portraits using 10 unsupervised keypoints and Jacobians.
-                \item Eliminates need for landmark detectors or 3D face models.
-                \item Inpainting handles disocclusion, but rare features (braces) vanish due to dataset bias.
+                \item \textbf{Autoencoder:} Low loss, but no identity swap; pretrained models gave better results.
+                \item \textbf{FOMM:} Head turns and blinks transferred smoothly; inpainting erased rare details (braces).
+                \item \textbf{Rectified Flow:} Head swap ran on a 4 GB GPU; the worst frames still jump.
+                \item \textbf{Lesson:} A low loss does not mean a usable swap; use a model built for the task.
             \end{itemize}
         \end{column}
 
@@ -45,7 +47,7 @@
                 \scriptsize
                 Code, inputs, and outputs:\\
                 \vspace{0.15cm}
-                \tiny \url{https://github.com/yusufarslan/face-reenactment}
+                \tiny \url{https://github.com/yusufarsln98/face-reenactment}
             \end{block}
         \end{column}
     \end{columns}

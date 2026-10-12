@@ -4,7 +4,10 @@
 stages the wanted frames in ascending frame order inside a throwaway temporary
 directory with sequential `%04d` names, and encodes them to an MP4.  When an
 audio source is given, its audio is extracted to a WAV and muxed into the same
-command.  The output is composed at the frame size: no scale, no pad.
+command.  `--audio-start` gives the source time in seconds where that audio
+starts.  It is an override only: with no `--audio-start` the audio starts where
+the frames do, at `--start` / `--fps`.  The output is composed at the frame
+size: no scale, no pad.
 
 Why the temporary directory.  The source directory holds two stray probe frames
 numbered 0000 and 0001 that sit before the clip's first frame (175).  Feeding
@@ -21,6 +24,11 @@ Run from the project root:
         --start 175 --end 270 --fps 29.969 \
         --audio "WhatsApp Video 2026-10-04 at 18.51.45.mp4" \
         --out out/video_report/02_step1_reassembly/faceswap_step1_reassembly.mp4
+
+Frame n sits at n / fps, so frame 175 is at 175 / 29.969 = 5.839 s.  The
+default audio start comes from the frame constants: --start (default MIN_FRAME)
+over --fps.  Thus the example starts the audio at 5.839 s and the sound matches
+the picture.  Add `--audio-start` only to override that value.
 """
 
 from __future__ import annotations
@@ -139,6 +147,9 @@ def main(argv: list[str] | None = None) -> int:
                         help=f"output frame rate (default {DEFAULT_FPS})")
     parser.add_argument("--audio", type=Path, default=DEFAULT_AUDIO,
                         help=f"source with the audio to mux (default {DEFAULT_AUDIO})")
+    parser.add_argument("--audio-start", type=float, default=None,
+                        help="source time in seconds where the audio starts; "
+                             "overrides the derived --start / --fps value")
     parser.add_argument("--no-audio", action="store_true",
                         help="encode video only, no audio track")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT,
@@ -149,6 +160,19 @@ def main(argv: list[str] | None = None) -> int:
     if audio_source is not None and not audio_source.exists():
         print(f"ERROR: audio source does not exist: {audio_source}", file=sys.stderr)
         return 2
+
+    # The audio must start where the frames do, or the sound does not match
+    # the picture.  Frame n sits at n / fps, so the default start is
+    # --start / --fps.  An explicit --audio-start only overrides that value.
+    audio_start = args.audio_start
+    if audio_source is not None and audio_start is None:
+        try:
+            audio_start = args.start / float(args.fps)
+        except (ValueError, ZeroDivisionError):
+            audio_start = 0.0
+            print(f"WARNING: cannot derive the audio start from --fps "
+                  f"{args.fps!r}; the audio starts at 0 s instead.",
+                  file=sys.stderr)
 
     # Collect the wanted frames; fail before any work if any are missing.
     ordered, missing = gather_frames(args.frames, args.pattern, args.start, args.end)
@@ -173,7 +197,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"staged directory: {staging}")
 
         if audio_source is not None:
-            rc = run(["ffmpeg", "-y", "-i", str(audio_source),
+            # Seek the source before -i, so the WAV starts with the frames.
+            rc = run(["ffmpeg", "-y", "-ss", str(audio_start),
+                      "-i", str(audio_source),
                       "-vn", "-acodec", "pcm_s16le", WAV_NAME], cwd=staging)
             if rc != 0:
                 return rc

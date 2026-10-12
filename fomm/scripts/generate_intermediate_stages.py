@@ -4,7 +4,7 @@ Generate updated intermediate stages visualization with the new Bella Poarch sou
 Produces a clean 5-panel comparison:
 1. Source & Keypoints
 2. Driving & Keypoints (Frame 286 / Smile)
-3. Deformed (Warped Features)
+3. Warped Source (RGB)
 4. Occlusion Mask (Grayscale, dark = unobserved/missing)
 5. Generator Inpainting Output
 """
@@ -96,7 +96,7 @@ def main():
         kp_dt_vals = kp_dt['value'][0].cpu().numpy()
         p2 = draw_kp(drv_target_256, kp_dt_vals)
         
-        # 3. Deformed source
+        # 3. Warped source (RGB)
         deformed = out['deformed'][0].permute(1, 2, 0).cpu().numpy()
         p3 = np.clip(deformed * 255, 0, 255).astype(np.uint8)
         
@@ -114,7 +114,7 @@ def main():
     titles = [
         "1. Source & Keypoints",
         f"2. Driving Frame & Keypoints (F:{target_idx})",
-        "3. Deformed (Feature Warping)",
+        "3. Warped Source (RGB)",
         "4. Occlusion Mask (Dark=Missing)",
         "5. Inpainting Output"
     ]

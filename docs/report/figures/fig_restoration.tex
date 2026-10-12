@@ -53,7 +53,8 @@
     {The fidelity weight does nothing. The v1.3.4 code passes no weight argument, and
      newer versions accept it without reading it.};
   \node[noteblock, execute at begin node=\raggedright, text width=5.50cm, anchor=north west] at (9.60,2.20)
-    {Restoration sees one frame at a time, so it cannot remove flicker.};
+    {Restoration sees one frame at a time, so it does not guarantee temporal
+     consistency.};
 
   \end{tikzpicture}
   \caption{The face restoration stage. Each raw frame is taken on its own: the face is

@@ -69,8 +69,9 @@
 
   % ---------------- notes ----------------
   \node[noteblock, execute at begin node=\raggedright, text width=5.60cm, anchor=north west] at (3.30,-3.45)
-    {\textbf{Safety gate:} a face detector counts faces before a frame is
-     rendered. A frame with more than one face is refused. There is no bypass.};
+    {\textbf{Face check:} the generation path has no face check. Only the
+     restoration stage checks faces; a frame with no face, or with two or
+     more faces, passes through unchanged.};
   \node[noteblock, execute at begin node=\raggedright, text width=5.85cm, anchor=north west] at (9.35,-3.45)
     {Only the last stage writes a video file. Every earlier stage works on PNG frames.};
 
@@ -80,7 +81,7 @@
        \tikz\fill[draw=black!70,line width=0.4pt,green!12] (0,0) rectangle (0.30,0.20); & input / output data\\
        \tikz\fill[draw=black!70,line width=0.4pt,blue!10]  (0,0) rectangle (0.30,0.20); & processing block\\
        \tikz\fill[draw=black!70,line width=0.4pt,orange!15](0,0) rectangle (0.30,0.20); & pipeline stage\\
-       \tikz\fill[draw=black!45,line width=0.4pt,red!8]    (0,0) rectangle (0.30,0.20); & note / gate\\
+       \tikz\fill[draw=black!45,line width=0.4pt,red!8]    (0,0) rectangle (0.30,0.20); & note\\
      \end{tabular}};
 
   \end{tikzpicture}

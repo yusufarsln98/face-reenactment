@@ -1,0 +1,106 @@
+% =============================================================
+% Backup material (appendix)
+% Frames moved out of the main flow.
+% This file is input after \appendix in main.tex.
+% =============================================================
+
+% --- Moved from 03_2_fomm_architecture.tex: motion representation ---
+\begin{frame}{Motion Representation: 0th-Order vs. 1st-Order Motion}
+    \begin{columns}[c]
+        \begin{column}{0.50\textwidth}
+            \small
+            \textbf{How Motion is Represented}
+            \begin{itemize}
+                \item \textbf{0th-Order (Translation Only):}
+                \begin{itemize}
+                    \item Moves points in 2D space $(x, y)$.
+                    \item Cannot stretch skin; movement looks stiff and robotic.
+                \end{itemize}
+                \vspace{0.15cm}
+                \item \textbf{1st-Order (FOMM / Local Affine):}
+                \begin{itemize}
+                    \item Estimates a Jacobian matrix around each point.
+                    \item Captures rotation, scale (open mouth), and shear (skin stretch).
+                \end{itemize}
+            \end{itemize}
+        \end{column}
+
+        \begin{column}{0.48\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=3.8cm, keepaspectratio]{diagram_facial_motion_order.png}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- Moved from 03_2_fomm_architecture.tex: FOMM pipeline ---
+\begin{frame}{FOMM Architectural Pipeline}
+    \begin{center}
+        \includegraphics[width=0.96\linewidth, height=2.6cm, keepaspectratio]{diagram_fomm_pipeline.png}
+    \end{center}
+
+    \vspace{0.1cm}
+
+    \begin{columns}[T]
+        \begin{column}{0.32\textwidth}
+            \begin{block}{1. Keypoint Detector}
+                \scriptsize Hourglass network extracts $K=10$ unsupervised keypoints and Jacobians.
+            \end{block}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \begin{block}{2. Dense Motion Network}
+                \scriptsize Combines sparse keypoint motions into dense optical flow ($T$) and mask ($O$).
+            \end{block}
+        \end{column}
+        \begin{column}{0.32\textwidth}
+            \begin{block}{3. Generator (Warp, Weight, Decode)}
+                \scriptsize Warps source features with flow $T$, weights them by the mask $O$, then decodes. Occluded areas ($O \approx 0$) fall back on learned priors.
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- Moved from 03_4_experiments_results.tex: inference pseudocode ---
+\begin{frame}[fragile]{Inference Pipeline: Python Pseudocode}
+    \begin{columns}[T]
+        \begin{column}{0.56\textwidth}
+            \begin{block}{Frame-by-Frame Execution Loop}
+                \scriptsize
+\begin{verbatim}
+# Reference keypoints: source and first driving frame
+kp_source = keypoint_detector(source_image)
+kp_init = keypoint_detector(driving_video[0])
+
+for frame_d in driving_video:
+    kp_driving = keypoint_detector(frame_d)
+    # Normalise kp and Jacobians to frame 0
+    kp_driving = normalize_kp(kp_source,
+        kp_driving, kp_init)
+    # Dense motion also needs the source image
+    flow, occ = dense_motion_net(source_image,
+        kp_source, kp_driving)
+    # Warp features, apply the mask, decode
+    out_frame = generator(source_image, flow, occ)
+
+    yield out_frame
+\end{verbatim}
+            \end{block}
+        \end{column}
+
+        \begin{column}{0.41\textwidth}
+            \small \textbf{Core Modules}
+            \begin{itemize}
+                \footnotesize
+                \item \texttt{keypoint\_detector}: Extracts 10 unsupervised keypoints.
+                \item \texttt{dense\_motion\_net}: Estimates flow and mask from the source image and keypoints.
+                \item \texttt{generator}: Warps source features, applies the mask, then decodes.
+            \end{itemize}
+
+            \vspace{0.1cm}
+            \begin{block}{Architectural Properties}
+                \scriptsize
+                \textbf{No Recurrence:} The loop carries no hidden state across frames ($t \to t+1$).\\
+                \textbf{No Adversarial Loss:} This configuration trains without a discriminator.
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}

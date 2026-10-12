@@ -1,5 +1,6 @@
 % Section 4: rectified flow head swap with FLUX.2-klein-4B.
-% Numbers come from rectified_flow/faceswap_20_metrics_summary.csv and rectified_flow/final_report/REPORT.md.
+% Numbers come from the run artifacts rectified_flow/final_report/faceswap_20_metrics_summary.csv
+% and rectified_flow/final_report/REPORT.md; these artifacts are not in the repository.
 % Figure inputs are relative to docs/report/.
 
 \section{Rectified Flow Head Swap}
@@ -10,7 +11,11 @@ We wanted to swap a video face with one from a selfie. The run had to stay on on
 The output had to keep the source motion, expression, lighting and background. Only the head should change. The clip is 96 frames at 512x512 and lasts 3.2 seconds.
 
 \subsection{How we measured}
-Every number comes from one script, run once per variant, each on the same 96 frames (175 to 270). The results table reports it. Face change is how much the face region moves from one frame to the next. The unswapped footage sets the level to match, so a value far below it means the smoother removed real motion too. Consecutive identity is how similar a face is to the one before it, measured in a face recognition embedding, so higher is more stable. Identity to the portrait measures similarity to the reference portrait; the unswapped footage scores near zero because it is a different person. Hair noise is how much the hair region flickers, and lower is better; p95 marks the worst frames, the value 95 percent stay under.
+Every number comes from one script, run once per variant, each on the same 96 frames (175 to 270). The results table reports it. The raw run records, the metric CSV and the 96-frame sets are not in the repository, so the reported numbers cannot be re-derived from this checkout.
+
+Face change is a temporal change indicator: the mean absolute grey difference between two frames inside one face box. The code takes the box from the first frame of the pair and reuses it for the second frame, so the box is not aligned to the second frame. Motion, lighting, texture change and flicker all enter the value, and the value has no calibrated threshold. The unswapped footage sets the control level.
+
+Consecutive identity is how similar a face is to the one before it, measured in a face recognition embedding, so a high value means temporal similarity; a wrong identity that stays consistent also scores high. Identity to the portrait measures similarity to the reference portrait; the unswapped footage scores near zero because it is a different person. Hair noise is how much the hair region flickers, and lower is better; p95 marks the worst frames, the value 95 percent stay under.
 
 \subsection{Pipeline overview}
 The flow has four stages. Generation transfers the identity, restoration cleans each face with GFPGAN, smoothing removes the boil, and reassembly attaches the audio. Only the last stage writes a video file.
@@ -43,7 +48,7 @@ FLUX.2-klein-4B renders each frame in four sampling steps. Each step moves the l
 
 The same VAE decodes the final latent into pixels. Picture order is part of the adapter contract: the adapter's own documentation names Picture 1 the body and Picture 2 the head, and says not to reverse the images. A reversed order gives the wrong head.
 
-The generator runs as a 4-bit GGUF file. A detector refuses a frame with more than one face, and the gate has no bypass.
+The generator runs as a 4-bit GGUF file. The production loop calls the generator once per frame and holds no face gate, and no multi-face check exists on the generation path. The only face check sits in the restoration stage: the gate passes a frame only when it detects exactly one face. Frames with no face or with two or more faces are copied through unchanged.
 
 The output is 96 frames from 5.8 to 9.0 seconds of the source, all with one fixed seed. Each frame took 16.3 seconds, so the stage used 26.1 minutes.
 
@@ -51,7 +56,7 @@ The output is 96 frames from 5.8 to 9.0 seconds of the source, all with one fixe
 \subsubsection{Adapter version comparison}
 The recorded clip uses adapter v1 throughout. A newer adapter, v1.1, was released during the work, and we tested two prompt variants, A and B. Table~\ref{tab:adapters} compares the two versions.
 
-v1.1 ran, but it went far past the memory of the card, which is why it slowed down so much. The v1.1 adapter has rank 512 against the 128 of v1, so it is four times larger. That is why it went past the card and slowed down. The extra time was not worth it for us.
+v1.1 ran, but it took about 199 seconds per frame against 16.34 for v1. Two measured values rose with it: the adapter rank, from 128 to 512 (four times larger), and the peak allocated memory, from 3.60 GiB to 4.68 GiB, past the 4.0 GiB of the card. That peak value is a PyTorch allocation counter (\texttt{torch.cuda.max\_memory\_allocated}), not driver-level or hardware evidence. Memory pressure is a plausible cause of the slowdown, but the measurements do not settle it. The extra time was not worth it for us.
 
 We judged the look by eye and preferred v1, so the clip kept the v1 output. No metric script was run on v1.1, so every other number here comes from v1. The grids in Figure~\ref{fig:lora_compare} are the only evidence.
 
@@ -79,17 +84,17 @@ GFPGAN v1.4 cleans every frame (Figure~\ref{fig:restoration}). It detects and al
 
 The stage costs 0.23 seconds per frame. The frames looked cleaner to us, and the mean face change came down, though the tail improved less.
 
-Hair noise fell slightly, a small gain on its own. The fidelity weight does nothing: the v1.3.4 code passes no weight argument, and newer versions accept it without reading it. Restoration cannot remove flicker, because it sees one frame at a time.
+Hair noise fell slightly, a small gain on its own. The fidelity weight does nothing: the v1.3.4 code passes no weight argument, and newer versions accept it without reading it. Restoration sees one frame at a time, so it does not guarantee temporal consistency.
 
 \input{figures/fig_restoration}
 \subsection{Temporal smoothing}
 The smoothing stage compares frames with each other and removes the boil (Figure~\ref{fig:smoothing}). The per-pixel deflicker averages each pixel with its temporal neighbours, and it is too strong. It costs 0.007 seconds per frame.
 
-The deflicker pushes the face change below the unswapped level, so it removes real motion as well as the boil. Optical flow estimates the dense motion between neighbouring frames and warps them onto the current one. Because it follows the same surface point across time, a moving head does not smear. It costs 0.036 seconds per frame.
+The deflicker pushes the face change below the unswapped level. The value has no calibrated threshold, and motion, lighting, texture change and flicker all enter it, so this drop alone does not show that real motion went away. Optical flow estimates the dense motion between neighbouring frames and warps them onto the current one. The warp follows surface points across time, but optical flow does not guarantee temporal consistency. It costs 0.036 seconds per frame.
 
-The control fixes the real motion level at 6.66, and the distance column is the face change minus that level. At strength 0.3 the chained pass comes close enough to the control, and the raw pass stays above it. A stronger setting sits below the control, which is over-smoothing.
+The control sets the reference change level at 6.66, and the distance column is the face change minus that level. At strength 0.3 the chained pass comes close to the control level, and the raw pass stays above it. A stronger setting sits below the control; the drop cannot separate removed motion from removed flicker.
 
-The recommended output is the chained set at strength 0.3. It beats the flow-only variant on face change, on the tail and on hair noise. Only consecutive identity is slightly lower. The deflicker reaches its low face change only by destroying motion, so we kept flow.
+The recommended output is the chained set at strength 0.3. It beats the flow-only variant on face change, on the tail and on hair noise. Only consecutive identity is slightly lower. The deflicker reaches its low face change at a value below the control; that value cannot separate removed motion from removed flicker, so we kept flow.
 
 \begin{table}[tb]
   \centering
@@ -115,13 +120,13 @@ The recommended output is the chained set at strength 0.3. It beats the flow-onl
 
 \input{figures/fig_smoothing}
 \subsection{Reassembly}
-The encoder turns a frame set into a playable clip (Figure~\ref{fig:reassembly}). It writes H.264 at 29.969 fps, muxes the original audio back, and trims both streams. Its output is a 512x512 clip of 3.203 seconds.
+The encoder turns a frame set into a playable clip (Figure~\ref{fig:reassembly}). It writes H.264 at 29.969 fps and trims both streams. The audio must come from the same interval as the frames, 5.8 to 9.0 seconds of the source. The reassembly tool derives that start from the frame constants, so a normal run takes the audio from 5.839 seconds, and \texttt{-{}-audio-start} overrides it. An earlier version took the full-video audio from t=0, which mixed the wrong interval into the picture. The \texttt{-shortest} flag only cuts the audio to the video length; it does not shift the start. Its output is a 512x512 clip of 3.203 seconds.
 
 The encode is lossy: it changes pixels slightly, but it cannot alter the face motion. In the raw swapped set the face boils, and the results table holds the values.
 
 \input{figures/fig_reassembly}
 \subsection{Results}
-All numbers come from one script, run once per variant, each on the same 96 frames (175 to 270). Lower hair noise is better, and higher identity values are better. Face change should sit near the control level, because a value below it means the smoother removed real motion. The control row is the unswapped source footage.
+All numbers come from one script, run once per variant, each on the same 96 frames (175 to 270). Lower hair noise is better, and higher identity values are better. Face change is a temporal change indicator with no calibrated threshold. A value below the control level shows more change removed than the source holds, but motion, lighting, texture change and flicker all enter the number, so the drop alone does not prove that the smoother removed real motion. The control row is the unswapped source footage.
 
 \begin{table}[tb]
   \centering
@@ -146,7 +151,7 @@ All numbers come from one script, run once per variant, each on the same 96 fram
   \label{tab:results}
 \end{table}
 
-Identity to the portrait confirms the swap direction. The unswapped footage scores near zero, and every swapped variant scores positive. The recommended set held up well against the control on the mean values. Figure~\ref{fig:stage_strip} shows the effect of each stage on one frame.
+The identity-to-portrait value of about 0.215 sits above the control value of $-0.0356$. The unswapped footage scores near zero, and every swapped variant scores positive. The output is closer to the reference portrait, but the measure has no calibrated threshold, so this value alone does not prove identity transfer. Consecutive identity, about 0.938 on the recommended set, measures temporal similarity, and a wrong identity that stays consistent also scores high. The recommended set held up well against the control on the mean values. Figure~\ref{fig:stage_strip} shows the effect of each stage on one frame.
 
 \input{figures/fig_stage_strip}
 \subsection{Problems and decisions}

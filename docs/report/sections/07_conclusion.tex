@@ -1,0 +1,30 @@
+% Section 7: general conclusion across the three methods.
+% No new measurements; the numbers stay in Sections 2 to 5.
+
+\section{Conclusion}
+
+The three methods left us with three different results. FOMM moved head turns
+and blinks smoothly and produced its clip in about 2.5 minutes, but it lost rare
+details such as braces when it inpainted the mouth. The rectified flow pipeline
+produced a 512 $\times$ 512 clip with sound on the 4 GB laptop we had, and its
+restoration and smoothing stages removed much of the boil. Our own autoencoder
+rebuilt faces well, but it never learned to move an identity from one person to
+the other.
+
+The failures had reasons, or at least clear hypotheses. The autoencoder loss
+went down while the swap stayed wrong, because the training objective rewarded
+reconstruction and our dataset of 238 images was small; 100 more epochs did not
+change the result. The lost braces on FOMM have a hypothesis and no direct
+evidence: the training videos may show no braces, so the learned appearance
+priors cannot rebuild them. In the rectified flow clip every frame is generated
+on its own, so the face boils, and the smoothing only works inside short
+windows; the worst frames still jump. The newer adapter v1.1 was twelve times
+slower than v1, so the recorded clip kept v1.
+
+What we learned reaches past the single results. A low loss does not mean a
+usable face swap, so the measure must match the goal. A model built for the
+task, even a released checkpoint, gave more than our own simple model. Per-frame
+generation always boils, and only a pass across frames reduces it. Finally,
+every measure here has limits: the face change value mixes motion, lighting,
+texture and flicker, and it has no calibrated threshold, so we read the numbers
+together with the frames, not instead of them.

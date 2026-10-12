@@ -1,7 +1,7 @@
 % Figure: occlusion and inpainting in the FOMM generator.
 % A closed mouth or a turned head reveals pixels that are missing in the source.
-% $O \approx 1$: the pixels come from the source. $O \approx 0$: the network
-% draws the area itself from the training-set average.
+% $O$ is a learned per-pixel weight on the warped features. Near 1 the weight is
+% full; near 0 the decoder fills the area from learned appearance priors.
 % Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{arrows.meta}
 \begin{figure}[tb]
   \centering
@@ -48,14 +48,15 @@
   % ---------------- the two regions ----------------
   \draw[leader] (7.75,1.00) -- (7.75,1.14);
   \node[font=\scriptsize, align=center, text width=4.30cm, anchor=south]
-    at (7.75,1.16) {visible pixels: taken from the source, $O\approx1$};
+    at (7.75,1.16) {visible area: $O\approx1$, the decoder trusts the warped features};
   \draw[leader] (8.30,-0.80) -- (9.45,-0.80);
   \node[font=\scriptsize, align=left, text width=3.30cm, anchor=west]
-    at (9.50,-0.80) {new area: no pixels in the source, $O\approx0$, drawn by the network};
+    at (9.50,-0.80) {new area: no pixels exist there in the source, $O\approx0$,
+    filled from learned appearance priors};
 
   \end{tikzpicture}
-  \caption{Occlusion and inpainting. Where $O$ is near 1, the pixels come from
-    the source. Where $O$ is near 0, the network draws the missing pixels
-    itself.}
+  \caption{Occlusion and inpainting. $O$ is a learned per-pixel weight on the
+    warped features. Where $O$ is near 0, the model trusts the warped features
+    less, and the decoder fills the area from learned appearance priors.}
   \label{fig:fomm_occlusion}
 \end{figure}

@@ -58,26 +58,30 @@
 
     \vspace{0.1cm}
     \begin{center}
-        {\footnotesize
-        \begin{tabular}{lrrrr}
+        {\scriptsize
+        \begin{tabular}{lrrrrr}
             \toprule
-            \textbf{Stage} & \textbf{Face change} & \textbf{Consecutive identity} & \textbf{Identity to portrait} & \textbf{Hair noise} \\
+            \textbf{Stage} & \textbf{Face change} & \textbf{p95} & \textbf{Consecutive identity} & \textbf{Identity to portrait} & \textbf{Hair noise} \\
             \midrule
-            Control & 6.657 & 0.985 & $-0.036$ & 31.600 \\
-            Raw swap & 7.451 & 0.923 & 0.215 & 32.570 \\
-            Restoration & 7.160 & 0.927 & 0.215 & 32.072 \\
-            Flow on raw & 6.666 & 0.939 & 0.215 & 32.060 \\
-            Restoration + flow & 6.630 & 0.938 & 0.215 & 31.731 \\
-            Deflicker & 5.627 & 0.936 & 0.211 & 31.896 \\
+            Control & 6.657 & 12.3488 & 0.985 & $-0.036$ & 31.600 \\
+            Raw swap & 7.451 & 17.3794 & 0.923 & 0.215 & 32.570 \\
+            Restoration & 7.160 & 16.2097 & 0.927 & 0.215 & 32.072 \\
+            Flow on raw & 6.666 & 15.6581 & 0.939 & 0.215 & 32.060 \\
+            Restoration + flow & 6.630 & 15.2802 & 0.938 & 0.215 & 31.731 \\
+            Deflicker & 5.627 & 12.6650 & 0.936 & 0.211 & 31.896 \\
             \bottomrule
         \end{tabular}}
+
+        \vspace{0.08cm}
+        {\scriptsize Settings: strength 0.6 for flow on raw, 0.3 for restoration + flow. \\
+        Reading: these metrics are temporal change indicators, not proof; motion, lighting, texture change and flicker all enter the number, so read them together with the visual observation.}
     \end{center}
 
     \vspace{0.05cm}
     \small
     \begin{itemize}
         \item \textbf{Recommended.} Restoration, then optical flow at strength 0.3.
-        \item \textbf{Rejected.} The per-pixel deflicker is cheaper, but it removes real motion too.
+        \item \textbf{Rejected.} The deflicker is cheaper, but its low face change suggests lost motion.
     \end{itemize}
 \end{frame}
 
@@ -87,17 +91,17 @@
     \begin{center}
         \begin{minipage}[b]{4.2cm}
             \centering
-            \animategraphics[autoplay,loop,width=\linewidth]{3.33}{anim_raw/frame_}{000}{031}\\[0.08cm]
+            \animategraphics[autoplay,loop,width=\linewidth]{10}{anim_raw/frame_}{000}{031}\\[0.08cm]
             {\scriptsize Raw assembly}
         \end{minipage}\hfill
         \begin{minipage}[b]{4.2cm}
             \centering
-            \animategraphics[autoplay,loop,width=\linewidth]{3.33}{anim_flow/frame_}{000}{031}\\[0.08cm]
+            \animategraphics[autoplay,loop,width=\linewidth]{10}{anim_flow/frame_}{000}{031}\\[0.08cm]
             {\scriptsize Flow on the raw frames}
         \end{minipage}\hfill
         \begin{minipage}[b]{4.2cm}
             \centering
-            \animategraphics[autoplay,loop,width=\linewidth]{3.33}{anim_chain/frame_}{000}{031}\\[0.08cm]
+            \animategraphics[autoplay,loop,width=\linewidth]{10}{anim_chain/frame_}{000}{031}\\[0.08cm]
             {\scriptsize Restoration + flow}
         \end{minipage}
     \end{center}
@@ -106,8 +110,10 @@
     \small
     \begin{itemize}
         \item \textbf{Reassembly.} H.264 at 29.969 fps, with the original audio muxed back.
-        \item \textbf{Watch the boil.} It is clear in the first clip and gone in the last one.
+        \item \textbf{Watch the boil.} It is clear in the first clip and reduced in the last one. Some frames still jump.
     \end{itemize}
+
+    \note{The embedded PDF animation plays only in a viewer that supports animate.sty. A local MP4 backup of the clip exists.}
 \end{frame}
 
 % --- Slide 5: Adapter Versions and Failure Analysis ---

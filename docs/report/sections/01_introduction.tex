@@ -1,0 +1,43 @@
+% Section 1: shared introduction for the report.
+% The method chapters (Sections 2, 3 and 4) stay unchanged.
+
+\section{Introduction}
+
+This project studies face reenactment, one way to make a deepfake. The aim is to
+take the face from one picture and let it follow the movement from another
+source, then write the result as a video. The assignment asked for a working
+deepfake model, or any model with a comparable face reenactment or
+identity-mapping effect. It also asked us to document every choice and turning
+point, to include the failed experiments with the reasons for the failure, and
+to reflect on what each experiment taught us. This report gives that record.
+
+Every method in this report works with two inputs. The identity image supplies
+the face. The driving or motion source supplies the movement. The two roles
+never change, but each method uses the pair its own way, and the chapters give
+the inputs their own names. The autoencoder chapter calls them the source face
+image and the target video. The FOMM chapter calls them the source image and the
+driving video. The rectified flow chapter pairs a portrait with a body frame
+from the clip.
+
+We explored three methods, one from each family. The first is an autoencoder
+with one shared encoder and one decoder per person. We built and trained it
+ourselves to learn the basics, and we also tested three pretrained face-swap
+models from FaceFusion. The second is the keypoint-based First Order Motion
+Model (FOMM). It needs no landmark detector and no 3D face model, and it
+animates a source photo with the motion of a driving video. The third is a head
+swap with a rectified flow model and a LoRA adapter. A released checkpoint that
+needs only four sampling steps fits the one laptop with the 4 GB GPU that we
+had.
+
+The three methods differ inside, but they share one picture-level pipeline. They
+read an identity image and a motion source, run a model that writes one output
+frame per frame of the motion source, and save the frames as a clip. The
+autoencoder had to be trained first. FOMM and the rectified flow pipeline load
+released checkpoints, and the rectified flow pipeline adds restoration,
+smoothing and reassembly after generation. We judge the frames by eye and with
+the measures defined in each chapter.
+
+Section 2 covers the autoencoder experiments and the pretrained FaceFusion
+models, Section 3 covers the GAN background and FOMM, and Section 4 covers the
+rectified flow pipeline. Section 5 compares the three methods side by side, and
+the conclusion chapter reports what worked, what failed, and what we learned.

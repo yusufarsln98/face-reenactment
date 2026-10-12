@@ -6,8 +6,10 @@
             \small
             \textbf{Core Objective}
             \begin{itemize}
-                \item Animate static \textbf{Source ($S$)} photo using motion from \textbf{Driving ($D$)} video.
-                \item Preserve identity of $S$, transfer motion dynamics from $D$.
+                \item Every method works with two roles.
+                \item The \textbf{identity image} supplies the face.
+                \item The \textbf{motion source} supplies the movement.
+                \item Each method uses the pair in its own way.
             \end{itemize}
 
             \vspace{0.15cm}
@@ -24,14 +26,16 @@
                 \small
                 \textbf{Inputs:}
                 \begin{itemize}
-                    \item One static portrait photo ($S$)
-                    \item A driving video sequence ($D$)
+                    \item Identity image: supplies the face.
+                    \item Motion source: supplies the movement.
                 \end{itemize}
+                \vspace{0.1cm}
+                \textit{Each method gives the inputs their own names.}
                 \vspace{0.1cm}
                 \textbf{Output:}
                 \begin{itemize}
-                    \item Reenacted video of $S$
-                    \item Mimicking expressions and head pose of $D$
+                    \item Reenacted video of the identity face
+                    \item Mimicking expressions and head pose of the motion source
                 \end{itemize}
             \end{block}
         \end{column}
