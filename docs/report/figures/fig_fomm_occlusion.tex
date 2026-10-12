@@ -1,0 +1,61 @@
+% Figure: occlusion and inpainting in the FOMM generator.
+% A closed mouth or a turned head reveals pixels that are missing in the source.
+% $O \approx 1$: the pixels come from the source. $O \approx 0$: the network
+% draws the area itself from the training-set average.
+% Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{arrows.meta}
+\begin{figure}[tb]
+  \centering
+  \begin{tikzpicture}[
+    x=1cm, y=1cm,
+    font=\small,
+    block/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=blue!10, align=center, inner sep=4pt, minimum height=9mm},
+    inputblock/.style={block, fill=green!12},
+    flow/.style={->, >=Latex, line width=0.7pt, draw=black!75},
+    leader/.style={draw=black!45, line width=0.4pt},
+  ]
+
+  % ---------------- source frame (closed mouth) ----------------
+  \node[inputblock, minimum width=2.20cm, minimum height=2.20cm] (src) at (1.15,0.90) {};
+  \node[font=\scriptsize] at (1.15,1.72) {\textbf{Source image}};
+  \fill[black!70] (0.80,1.22) circle (0.6mm);
+  \fill[black!70] (1.50,1.22) circle (0.6mm);
+  \draw[black!70, line width=1pt] (0.80,0.42) -- (1.50,0.42);
+  \node[font=\scriptsize] at (1.15,0.10) {closed mouth};
+
+  % ---------------- driving frame (open mouth) ----------------
+  \node[inputblock, minimum width=2.20cm, minimum height=2.20cm] (drv) at (1.15,-1.60) {};
+  \node[font=\scriptsize] at (1.15,-0.72) {\textbf{Driving frame}};
+  \fill[black!70] (0.80,-1.22) circle (0.6mm);
+  \fill[black!70] (1.50,-1.22) circle (0.6mm);
+  \fill[draw=black!60, line width=0.4pt, orange!35] (1.15,-2.02) ellipse (0.42cm and 0.26cm);
+  \node[font=\scriptsize] at (1.15,-2.47) {open mouth};
+
+  % ---------------- generator ----------------
+  \node[block, text width=2.20cm, minimum height=1.40cm] (gen) at (4.55,-0.35)
+    {\textbf{Generator}\\[1pt]\scriptsize warp + inpaint};
+  \draw[flow] (src.east) -| (gen.north);
+  \draw[flow] (drv.east) -| (gen.south);
+
+  % ---------------- output frame ----------------
+  \node[inputblock, minimum width=2.60cm, minimum height=2.70cm] (out) at (7.75,-0.35) {};
+  \node[font=\scriptsize] at (7.75,0.62) {\textbf{Output frame}};
+  \fill[black!70] (7.35,0.12) circle (0.6mm);
+  \fill[black!70] (8.15,0.12) circle (0.6mm);
+  \fill[draw=black!60, line width=0.4pt, orange!35] (7.75,-0.80) ellipse (0.55cm and 0.33cm);
+  \draw[flow] (gen.east) -- (out.west);
+
+  % ---------------- the two regions ----------------
+  \draw[leader] (7.75,1.00) -- (7.75,1.14);
+  \node[font=\scriptsize, align=center, text width=4.30cm, anchor=south]
+    at (7.75,1.16) {visible pixels: taken from the source, $O\approx1$};
+  \draw[leader] (8.30,-0.80) -- (9.45,-0.80);
+  \node[font=\scriptsize, align=left, text width=3.30cm, anchor=west]
+    at (9.50,-0.80) {new area: no pixels in the source, $O\approx0$, drawn by the network};
+
+  \end{tikzpicture}
+  \caption{Occlusion and inpainting. Where $O$ is near 1, the pixels come from
+    the source. Where $O$ is near 0, the network draws the missing pixels
+    itself.}
+  \label{fig:fomm_occlusion}
+\end{figure}

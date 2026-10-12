@@ -3,7 +3,7 @@
 
 ## 1. Deney Kurulumu ve Girdiler
 - **Model:** First Order Motion Model (VoxCeleb önceden eğitilmiş ağırlıklar: `vox-cpk.pth.tar`).
-- **Kaynak (Source Image):** `inputs/bella_poarch/source.png` (256x256).
+- **Kaynak (Source Image):** `inputs/bella_poarch/source.png` (512x512).
 - **Sürücü (Driving Video):** `inputs/bella_poarch/driving.mp4` (320 kare, ~30 FPS).
 - **Donanım:** Apple Silicon (CPU modu).
 

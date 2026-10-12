@@ -1,0 +1,55 @@
+% Figure: the First Order Motion Model pipeline (Siarohin et al., NeurIPS 2019).
+% The keypoint detector reads the source image once and each driving frame.
+% The dense motion network makes a motion field and an occlusion map.
+% The generator warps the source features and inpaints the occluded parts.
+% Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{arrows.meta}
+\begin{figure}[tb]
+  \centering
+  \begin{tikzpicture}[
+    x=1cm, y=1cm,
+    font=\small,
+    block/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=blue!10, align=center, inner sep=4pt, minimum height=9mm},
+    inputblock/.style={block, fill=green!12},
+    noteblock/.style={rectangle, rounded corners=2pt, draw=black!45, dashed,
+      fill=red!8, align=left, inner sep=3pt, font=\scriptsize},
+    flow/.style={->, >=Latex, line width=0.7pt, draw=black!75},
+  ]
+
+  % ---------------- inputs (left) ----------------
+  \node[inputblock, text width=2.00cm, minimum height=1.10cm] (src) at (1.15,1.60)
+    {\textbf{Source image}\\[1pt]\scriptsize the identity};
+  \node[inputblock, text width=2.00cm, minimum height=1.10cm] (drv) at (1.15,-0.10)
+    {\textbf{Driving video}\\[1pt]\scriptsize the motion};
+
+  % ---------------- the three parts ----------------
+  \node[block, text width=2.95cm, minimum height=2.30cm] (kpd) at (5.10,0.75)
+    {\textbf{Keypoint detector}\\[1pt]\scriptsize U-Net network\\$K=10$ keypoints\\one Jacobian each};
+  \node[block, text width=3.05cm, minimum height=2.30cm] (dmn) at (9.10,0.75)
+    {\textbf{Dense motion}\\\textbf{network}\\[1pt]\scriptsize motion field (optical\\flow) + occlusion map\\with values in $[0,1]$};
+  \node[block, text width=2.35cm, minimum height=1.50cm] (gen) at (12.75,0.75)
+    {\textbf{Generator}\\[1pt]\scriptsize warp + inpaint};
+
+  % ---------------- output ----------------
+  \node[inputblock, text width=2.10cm, minimum height=1.00cm] (out) at (12.75,-1.60)
+    {\textbf{Output frame}};
+
+  % ---------------- arrows ----------------
+  \draw[flow] (src.east) -- (kpd.west |- src.east);
+  \draw[flow] (drv.east) -- (kpd.west |- drv.east);
+  \draw[flow] (kpd) -- (dmn);
+  \draw[flow] (dmn) -- (gen);
+  \draw[flow] (gen.south) -- (out.north);
+
+  % ---------------- notes ----------------
+  \node[noteblock, text width=5.30cm, anchor=north west] at (0.20,-1.30)
+    {The detector reads the source once and every driving frame.};
+  \node[noteblock, text width=5.20cm, anchor=north west] at (5.90,-1.30)
+    {Each frame is processed alone; no memory between frames.};
+
+  \end{tikzpicture}
+  \caption{The First Order Motion Model pipeline: keypoints with Jacobians, a
+    motion field and an occlusion map, then warp and inpaint. Each frame is
+    processed alone.}
+  \label{fig:fomm_pipeline}
+\end{figure}

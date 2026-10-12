@@ -1,0 +1,133 @@
+% Section 3: GAN and FOMM.
+% Facts come from the six notes under fomm/notes/ and from the checked fact sheet.
+% The old slides are not used where the fact check corrected them.
+% Figure inputs are relative to docs/report/.
+
+\section{GAN \& FOMM}
+
+A generator is like a painter who draws faces. A discriminator is like an expert
+who judges each face as real or fake and teaches the painter. This game cannot
+follow orders, however. For reenactment we must keep one identity and copy the
+motion from a video, so we used the First Order Motion Model (FOMM).
+
+\subsection{Standard GANs}
+A standard GAN holds two networks. The generator $G$ reads a noise vector $z$
+and draws a face; the discriminator $D$ reads an image and gives a verdict: real
+or fake. The two train against each other, so the generator learns to fool the
+discriminator (Goodfellow et al., 2014), as Figure~\ref{fig:gan_training} shows.
+
+We cannot control the output. Identity, pose and mood are all mixed into the
+noise input. We cannot say ``keep this person, copy that motion''. A
+reenactment model needs two inputs instead: a source image (who) and a driving
+video (how it moves).
+
+\input{figures/fig_gan_training}
+
+\subsection{First Order Motion Model}
+FOMM animates one source photo with the head motion and the facial expressions
+from a driving video. The method comes from Siarohin et al. (``First Order
+Motion Model for Image Animation'', NeurIPS 2019). It needs no landmark detector
+and no 3D face model.
+It learns its own keypoints per object category; our category is faces. It
+follows Monkey-Net, which the paper calls the first object-agnostic deep model,
+and FOMM improves on it.
+
+\subsubsection{First-order motion}
+0th order motion moves a point only in $x$ and $y$, so the skin keeps its
+shape and the result looks stiff and robotic. 1st order motion also measures how
+the skin around the point turns, grows and stretches, through a small
+$2\times2$ Jacobian matrix per keypoint. The paper calls it a first order Taylor
+expansion.
+
+\subsubsection{The three parts}
+The pipeline has three parts (Figure~\ref{fig:fomm_pipeline}).
+
+\input{figures/fig_fomm_pipeline}
+
+The \textbf{keypoint detector} is a U-Net network (the paper's word; the code
+names the class Hourglass). It finds $K=10$ keypoints for the faces model and
+one Jacobian per keypoint. The expected point position is a weighted average
+over the output heatmaps (soft-argmax). An equivariance loss teaches the
+detector during training, so it needs no keypoint labels.
+
+The \textbf{dense motion network} turns the sparse keypoints into a dense motion
+field (optical flow) and an occlusion map with values between 0 and 1.
+
+The \textbf{generator} warps the source features with the flow. The code
+multiplies the warped features by the occlusion map
+(\texttt{out = out * occlusion\_map}). Where the map is near 0, the warped
+pixels lose their weight and the decoder fills the area from learned face priors
+(inpainting).
+
+Each frame is processed on its own. No state passes from frame to frame (no
+recurrence).
+
+\subsubsection{Occlusion and inpainting}
+A closed mouth or a turned head reveals pixels that do not exist in the source
+photo (self-occlusion). Where $O$ is near 1, the pixels come from the source.
+Where $O$ is near 0, the network draws the area itself from the training-set
+average (Figure~\ref{fig:fomm_occlusion}).
+
+These are the failure modes we saw. Rare personal details are lost in inpainted
+areas. Very large head turns, about 45 degrees or more, leave blurry patches.
+Both limits come from our own observation, not from the paper.
+
+\input{figures/fig_fomm_occlusion}
+
+\subsection{Local experiment}
+We ran the released VoxCeleb checkpoint \texttt{vox-cpk.pth.tar} in CPU mode on
+an Apple Silicon machine. The source portrait is 512x512; the driving clip is
+256x256, 320 frames, 29.97 FPS. With \texttt{-{}-relative} the keypoints move
+relative to the first frame; \texttt{-{}-adapt\_scale} adjusts the motion size
+with the convex hull of the keypoints.
+
+The output is 256x256, 320 frames, 29.97 FPS and 10.7 seconds long. The recorded
+speed is about 2.05 iterations per second, about 2.5 minutes in total. Head
+turns and blinks transferred smoothly; mouth motion needed inpainting.
+Table~\ref{tab:fomm_run} lists the setup and the output.
+
+\begin{table}[tb]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}l l@{}}
+    \toprule
+    Item & Value \\
+    \midrule
+    Checkpoint & \texttt{vox-cpk.pth.tar} (VoxCeleb) \\
+    Source portrait & 512 $\times$ 512 \\
+    Driving clip & 256 $\times$ 256, 320 frames, 29.97 FPS \\
+    Mode and flags & CPU, \texttt{-{}-relative}, \texttt{-{}-adapt\_scale} \\
+    Output & 256 $\times$ 256, 320 frames, 29.97 FPS, 10.7 s \\
+    Speed & about 2.05 it/s, about 2.5 minutes \\
+    \bottomrule
+  \end{tabular}
+  \caption{The local FOMM run: setup, flags and output.}
+  \label{tab:fomm_run}
+\end{table}
+
+\subsection{Failure mode: braces}
+The VoxCeleb training data has no braces, so the mouth area should lose them
+when inpainting starts. Our frames confirm this (Table~\ref{tab:fomm_braces}).
+
+\begin{table}[tb]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}r r l l@{}}
+    \toprule
+    Frame & Time & Driving mouth & Active path and result \\
+    \midrule
+    10 & 0.3 s & small shift & warping, $O\approx1$: braces kept \\
+    195 & 6.5 s & lips close & mouth hidden \\
+    288 & 9.6 s & wide smile & inpainting, $O\approx0$: plain teeth \\
+    \bottomrule
+  \end{tabular}
+  \caption{The braces test: the active path decides where the mouth pixels come
+    from.}
+  \label{tab:fomm_braces}
+\end{table}
+
+The active path decides which pixels appear: warped areas keep the pixels of the
+person, and inpainted areas follow the training data. FOMM gave the project a
+fast per-frame method. Identity details survive only in warped areas, and rare
+details such as braces are lost as soon as inpainting starts. There is no memory
+across frames, so the method cannot repair a frame from its neighbours.

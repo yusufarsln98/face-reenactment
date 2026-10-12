@@ -1,0 +1,56 @@
+% Figure: the standard GAN training loop (Goodfellow et al., 2014).
+% The Generator turns noise into a fake face. The Discriminator compares the fake
+% face with real faces from the dataset. The feedback teaches the Generator.
+% Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{arrows.meta}
+\begin{figure}[tb]
+  \centering
+  \begin{tikzpicture}[
+    x=1cm, y=1cm,
+    font=\small,
+    block/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=blue!10, align=center, inner sep=4pt, minimum height=9mm},
+    inputblock/.style={block, fill=green!12},
+    stageblock/.style={block, fill=orange!15},
+    flow/.style={->, >=Latex, line width=0.7pt, draw=black!75},
+    feed/.style={->, >=Latex, line width=0.7pt, draw=black!75, dashed},
+  ]
+
+  % ---------------- the data ----------------
+  \node[inputblock, text width=1.20cm, minimum height=1.05cm] (z) at (0.75,0)
+    {\textbf{noise} $z$};
+  \node[inputblock, text width=2.05cm, minimum height=1.05cm] (data) at (1.20,2.10)
+    {\textbf{Dataset} of\\real faces};
+  \node[inputblock, text width=1.45cm, minimum height=1.05cm] (real) at (6.30,2.10)
+    {real face};
+
+  % ---------------- the two networks ----------------
+  \node[block, text width=1.90cm, minimum height=1.05cm] (G) at (3.55,0)
+    {\textbf{Generator}\\$G$};
+  \node[block, text width=2.50cm, minimum height=1.05cm] (D) at (9.90,1.05)
+    {\textbf{Discriminator}\\$D$};
+
+  % ---------------- the fake face and the verdict ----------------
+  \node[inputblock, text width=1.45cm, minimum height=1.05cm] (fake) at (6.30,0)
+    {fake face};
+  \node[stageblock, text width=2.10cm, minimum height=1.05cm] (verdict) at (13.05,1.05)
+    {\textbf{verdict}:\\real or fake};
+
+  % ---------------- arrows ----------------
+  \draw[flow] (z) -- (G);
+  \draw[flow] (G) -- (fake);
+  \draw[flow] (data) -- (real);
+  \draw[flow] (fake) -- (D);
+  \draw[flow] (real) -- (D);
+  \draw[flow] (D) -- (verdict);
+
+  % ---------------- the training feedback ----------------
+  \draw[feed] (D.south) -- (9.90,-0.85) -- (3.55,-0.85) -- (G.south);
+  \node[font=\scriptsize, align=center, anchor=north] at (6.72,-0.95)
+    {the Generator learns to\\fool the Discriminator};
+
+  \end{tikzpicture}
+  \caption{The training loop of a standard GAN. The Discriminator compares each
+    fake face with real faces and gives a verdict; the dashed feedback teaches
+    the Generator to fool it.}
+  \label{fig:gan_training}
+\end{figure}
