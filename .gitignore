@@ -41,8 +41,13 @@ first-order-model/
 *.toc
 *.blg
 *.bbl
+*.nav
+*.snm
+*.vrb
 
 # Local agent working folder, fetched reference material only
 .agent/
 
 
+# Intermediate renders of the slide diagrams; the PNG is the output
+docs/slides/figures_src/*.pdf
