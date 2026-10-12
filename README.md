@@ -10,7 +10,7 @@ A comparative exploration of facial motion transfer and deepfake architectures f
 * **`fomm/`**: Method 2 — First Order Motion Model (GAN-based relative keypoint motion transfer).
   * **Experiment & Research Notes:** Detailed technical notes, implementation timeline, and failure mode analyses are located in [`fomm/notes/`](fomm/notes/).
   * **Inference Runner:** Run `python run.py <input_folder>` inside `fomm/`.
-* **`rectified_flow/`**: Method 3 — Diffusion-based iterative denoising approach.
+* **`rectified_flow/`**: Method 3 — Rectified flow head swap.
 * **`docs/`**: Shared group deliverables:
   * **[`docs/slides/`](docs/slides/)**: LaTeX Beamer presentation slides (including interactive YouTube demo links).
   * **[`docs/report/`](docs/report/)**: LaTeX academic project report.
