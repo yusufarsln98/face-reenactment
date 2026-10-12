@@ -34,11 +34,11 @@
 \node[rowlbl,anchor=east] at (1.63,-1.2) {smoothing};
 
 % ---- row 1: restore --------------------------------------------------------
-\node[proc,anchor=west] (r1a) at (1.85,0)    {raw frame};
-\node[proc,anchor=west] (r1b) at (4.28,0)    {detect and align};
-\node[proc,anchor=west] (r1c) at (7.64,0)    {restore};
-\node[proc,anchor=west] (r1d) at (9.61,0)    {composite back};
-\node[proc,anchor=west] (r1e) at (12.93,0)   {clean frame};
+\node[proc,minimum width=1.8717cm,anchor=west] (r1a) at (1.85,0)    {raw frame};
+\node[proc,minimum width=2.8049cm,anchor=west] (r1b) at (4.2647,0)    {detect and align};
+\node[proc,minimum width=1.4172cm,anchor=west] (r1c) at (7.6126,0)    {restore};
+\node[proc,minimum width=2.7581cm,anchor=west] (r1d) at (9.5729,0)    {composite back};
+\node[proc,minimum width=2.1560cm,anchor=west] (r1e) at (12.8741,0)   {clean frame};
 \draw[fl] (r1a) -- (r1b);
 \draw[fl] (r1b) -- (r1c);
 \draw[fl] (r1c) -- (r1d);
@@ -46,10 +46,10 @@
 
 % ---- row 2: smooth ---------------------------------------------------------
 \node[proc,anchor=west] (r2a) at (1.85,-1.2)  {two neighbours};
-\node[proc,anchor=west] (r2b) at (5.05,-1.2)  {estimate motion};
-\node[proc,anchor=west] (r2c) at (8.35,-1.2)  {warp};
-\node[proc,anchor=west] (r2d) at (9.94,-1.2)  {blend at 0.3};
-\node[proc,anchor=west] (r2e) at (12.59,-1.2) {smooth frame};
+\node[proc,anchor=west] (r2b) at (5.0540,-1.2)  {estimate motion};
+\node[proc,anchor=west] (r2c) at (8.3588,-1.2)  {warp};
+\node[proc,anchor=west] (r2d) at (9.9500,-1.2)  {blend at 0.3};
+\node[proc,anchor=west] (r2e) at (12.6039,-1.2) {smooth frame};
 \draw[fl] (r2a) -- (r2b);
 \draw[fl] (r2b) -- (r2c);
 \draw[fl] (r2c) -- (r2d);

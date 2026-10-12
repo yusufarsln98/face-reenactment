@@ -57,16 +57,16 @@
 \draw[feed] (lat.east) -- (7.64,-0.35);
 \draw[feed] (tok.east) -- (7.64,-1.75);
 \draw[feed] (7.64,1.05) -- (7.64,-1.75);
-\draw[fl] (7.64,-0.35) -- (8.04,-0.35);
 
 % ---- flow model with its adapter -------------------------------------------
 \node[proc] (flux) at (9.34,-0.35) {\twoline{FLUX.2-klein}{4 steps}};
+\draw[fl] (7.64,-0.35) -- (flux.west);
 \node[proc,minimum width=1.3cm,anchor=north west] (lora) at (flux.south west) {LoRA};
 
 % ---- decode ----------------------------------------------------------------
 \draw[fl] (flux.east) -- (11.19,-0.35);
 \node[proc] (vdec) at (12.32,-0.35) {VAE decode};
-\node[data,anchor=west] (out) at (13.99,-0.35) {\twoline{frame}{512x512}};
+\node[data,anchor=west] (out) at (13.81,-0.35) {\twoline{frame}{512x512}};
 \draw[fl] (vdec.east) -- (out.west);
 \end{tikzpicture}
 \end{document}

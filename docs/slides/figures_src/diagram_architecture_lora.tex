@@ -54,14 +54,14 @@
 % text encoder input (left of the stack)
 \node[box, minimum width=2.13cm, minimum height=0.95cm] (enc) at (1.115,3.20) {Qwen3-4B\\text encoder};
 \draw[ar] (enc.east) -- (s3.west);
-\node[alab] at (2.78,3.60) {text\\tokens};
+\node[alab] at (2.78,3.76) {text\\tokens};
 
 % timestep input (right of the stack); one branched dashed path into the stack
 \node[box, minimum width=1.87cm, minimum height=0.95cm] (ts) at (7.935,3.20) {timestep\\embedding};
-\draw[dline] (ts.west) -- (6.86,3.20) -- (6.86,1.10);
-\draw[din] (6.86,3.20) -- (6.68,3.20);
-\draw[din] (6.86,1.80) -- (6.68,1.80);
-\draw[din] (6.86,1.10) -- (6.68,1.10);
+\draw[dline] (ts.west) -- (6.92,3.20) -- (6.92,1.10);
+\draw[din] (6.92,3.20) -- (6.68,3.20);
+\draw[din] (6.92,1.80) -- (6.68,1.80);
+\draw[din] (6.92,1.10) -- (6.68,1.10);
 \node[note] at (7.99,2.42) {scale and shift};
 
 % ================= RIGHT PART: LoRA injection zoom, x = 9.05 .. 15.13 =================
@@ -75,17 +75,17 @@
 
 % upper branch: frozen weight
 \node[box, minimum width=1.65cm, minimum height=0.80cm] (fw) at (11.555,3.85) {frozen W};
-\node[note] at (11.46,3.14) {never trained};
+\node[note] at (11.61,3.04) {never trained};
 
 % lower branch: trained pair A, B
 \node[box, minimum width=0.70cm, minimum height=0.80cm] (A) at (11.08,1.55) {A};
 \node[box, minimum width=0.70cm, minimum height=0.80cm] (B) at (12.03,1.55) {B};
 \draw[ar] (A.east) -- (B.west);
-\node[note] at (11.47,2.52) {rank 128,\\trained};
+\node[note] at (11.62,2.42) {rank 128,\\trained};
 
 % merge at the circled plus
-\draw[ln] (fw.east) -- (12.66,2.70);
-\draw[ln] (B.east)  -- (12.66,2.70);
+\draw[ln] (fw.east) -- (12.85,2.70);
+\draw[ln] (B.east)  -- (12.85,2.70);
 \draw[ln, fill=white] (12.94,2.70) circle (0.28cm);
 \draw[ln] (12.79,2.70) -- (13.09,2.70);
 \draw[ln] (12.94,2.55) -- (12.94,2.85);
@@ -93,7 +93,7 @@
 % output and formula
 \draw[ar] (13.22,2.70) -- (13.48,2.70);
 \node[box, minimum width=1.28cm, minimum height=0.80cm] (out) at (14.12,2.70) {output};
-\node[text=primaryNavy, font=\small, align=center] at (14.12,1.45) {$Wx + \frac{\alpha}{r}BAx$};
+\node[text=primaryNavy, font=\small, align=center] at (14.00,1.45) {$Wx + \frac{\alpha}{r}BAx$};
 
 \end{tikzpicture}
 \end{document}

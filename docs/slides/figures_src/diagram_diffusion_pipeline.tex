@@ -32,11 +32,11 @@
 
 % ---- one box for the three inputs, then the four stages and the clip --------
 \node[proc,minimum width=2.2cm,anchor=west] (inp)  at (0.10,0) {portrait\\body frame\\prompt};
-\node[proc,minimum width=2.1cm,anchor=west] (gen)  at (2.90,0) {generation};
-\node[proc,minimum width=2.1cm,anchor=west] (res)  at (5.60,0) {restoration};
-\node[proc,minimum width=2.1cm,anchor=west] (smo)  at (8.30,0) {smoothing};
-\node[proc,minimum width=2.1cm,anchor=west] (rea)  at (11.00,0) {reassembly};
-\node[proc,minimum width=1.3cm,anchor=west] (clip) at (13.45,0) {3.2 s clip};
+\node[proc,minimum width=2.1cm,anchor=west] (gen)  at (2.7636,0) {generation};
+\node[proc,minimum width=2.1cm,anchor=west] (res)  at (5.3273,0) {restoration};
+\node[proc,minimum width=2.1cm,anchor=west] (smo)  at (7.8909,0) {smoothing};
+\node[proc,minimum width=2.1cm,anchor=west] (rea)  at (10.4546,0) {reassembly};
+\node[proc,minimum width=2.1cm,anchor=west] (clip) at (13.0182,0) {3.2 s clip};
 
 % ---- the flow --------------------------------------------------------------
 \draw[fl] (inp) -- (gen);
@@ -46,14 +46,14 @@
 \draw[fl] (rea) -- (clip);
 
 % ---- what travels between the stages ---------------------------------------
-\node[sub] at (5.30,0.66) {96 frames};
-\node[sub] at (8.00,0.66) {restored};
-\node[sub] at (10.70,0.66) {smoothed};
+\node[sub] at (5.0955,0.66) {96 frames};
+\node[sub] at (7.6591,0.66) {restored};
+\node[sub] at (10.2228,0.66) {smoothed};
 
 % ---- cost of each stage ----------------------------------------------------
-\node[sub] at (3.95,-0.72) {16.3 s per frame};
-\node[sub] at (6.65,-0.72) {0.23 s per frame};
-\node[sub] at (9.35,-0.72) {0.036 s per frame};
-\node[sub] at (12.05,-0.72) {under 1 s};
+\node[sub] at (3.8136,-0.72) {16.3 s per frame};
+\node[sub] at (6.3773,-0.72) {0.23 s per frame};
+\node[sub] at (8.9409,-0.72) {0.036 s per frame};
+\node[sub] at (11.5046,-0.72) {under 1 s};
 \end{tikzpicture}
 \end{document}

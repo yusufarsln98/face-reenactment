@@ -20,13 +20,13 @@
   ]
 
   % ---------------- conditioning: prompt, text encoder, embeddings (top) ----------------
-  \node[inputblock, text width=2.60cm] (prompt) at (1.47,12.24)
+  \node[inputblock, text width=2.60cm] (prompt) at (1.47,12.34)
     {\textbf{Fixed prompt,}\\\textbf{409 characters}\\[1pt]\scriptsize names Picture 1
      and Picture 2};
-  \node[block, text width=4.10cm] (enc) at (5.30,12.24)
+  \node[block, text width=4.10cm] (enc) at (5.30,12.34)
     {\textbf{Qwen3-4B text encoder}\\[1pt]\scriptsize CPU, 4 bit, about 80 s once per
      session, then its memory is freed};
-  \node[block, text width=2.95cm] (emb) at (9.60,12.24) {\textbf{text embeddings}};
+  \node[block, text width=2.95cm] (emb) at (9.60,12.34) {\textbf{text embeddings}};
   \draw[flow] (prompt.east) -- (enc.west);
   \draw[flow] (enc.east) -- (emb.west);
 
@@ -40,19 +40,19 @@
   \draw[flow] (bodyf.east) -- (vaeA.west);
   \draw[flow] (vaeA.east) -- (latA.west);
 
-  \node[inputblock, text width=1.75cm] (port) at (1.20,8.45)
+  \node[inputblock, text width=1.75cm] (port) at (1.20,8.35)
     {\textbf{Portrait}\\\textbf{256x256}\\[1pt]\scriptsize identity only};
-  \node[block, text width=1.35cm] (vaeB) at (3.35,8.45) {\textbf{VAE}\\\textbf{encode}};
-  \node[block, text width=2.45cm] (latB) at (5.85,8.45)
+  \node[block, text width=1.35cm] (vaeB) at (3.35,8.35) {\textbf{VAE}\\\textbf{encode}};
+  \node[block, text width=2.45cm] (latB) at (5.85,8.35)
     {\textbf{about 256 tokens}\\[1pt]\scriptsize identity only};
   \draw[flow] (port.east) -- (vaeB.west);
   \draw[flow] (vaeB.east) -- (latB.west);
 
   % ---------------- out of the loop: final latent, decode, frame (right) ----------------
-  \node[inputblock, text width=1.05cm] (final) at (11.315,5.31)
+  \node[inputblock, text width=1.05cm] (final) at (11.315,5.46)
     {\textbf{final}\\\textbf{latent}};
-  \node[block, text width=1.25cm] (dec) at (12.975,5.31) {\textbf{VAE}\\\textbf{decode}};
-  \node[inputblock, text width=1.50cm] (frame) at (14.86,5.31)
+  \node[block, text width=1.25cm] (dec) at (12.975,5.46) {\textbf{VAE}\\\textbf{decode}};
+  \node[inputblock, text width=1.50cm] (frame) at (14.86,5.46)
     {\textbf{512x512}\\\textbf{frame}};
 
   % ---------------- the sampler container: the loop around the model ----------------
@@ -60,26 +60,26 @@
     (3.30,2.39) rectangle (10.30,7.55);
   \node[anchor=north west, inner sep=0pt] at (3.50,7.45) {\textbf{the sampler, four steps}};
 
-  \node[inputblock, text width=1.75cm] (state) at (4.75,5.31)
+  \node[inputblock, text width=1.75cm] (state) at (4.75,5.46)
     {\textbf{current latent}\\[1pt]\scriptsize starts as noise,\\one fixed seed};
-  \node[block, text width=3.35cm] (model) at (8.00,5.31)
+  \node[block, text width=3.35cm] (model) at (8.00,5.46)
     {\textbf{FLUX.2-klein-4B}\\\textbf{+ LoRA}\\[1pt]\scriptsize predicts the direction};
 
   \draw[flow] (state.east) -- (model.west);
-  \draw[flow] (model.east) -- (10.10,5.31);
-  \fill[black!75] (10.10,5.31) circle (1.2pt);
-  \draw[flow] (10.10,5.31) -- (final.west);
+  \draw[feed] (model.east) -- (10.10,5.46);
+  \fill[black!75] (10.10,5.46) circle (1.2pt);
+  \draw[flow] (10.10,5.46) -- (final.west);
   \draw[flow] (final.east) -- (dec.west);
   \draw[flow] (dec.east) -- (frame.west);
 
   % the loop back: the output re-enters the latent state
-  \draw[flow] (10.10,5.31) -- (10.10,3.89) -- (4.75,3.89) -- (state.south);
+  \draw[flow] (10.10,5.46) -- (10.10,3.89) -- (4.75,3.89) -- (state.south);
 
   % the step counter sits on the loop, and the step number enters the model
   \node[stageblock, text width=1.95cm, minimum height=0.55cm] (chip) at (8.60,3.89)
     {\textbf{step 1 of 4}};
   \draw[flow] (chip.north) -- (chip.north |- model.south);
-  \node[font=\scriptsize, anchor=west] at (8.75,4.42) {timestep};
+  \node[font=\scriptsize, anchor=west] at (8.75,4.46) {timestep};
   \node[font=\scriptsize, text width=3.00cm, align=center, anchor=north] at (5.85,3.76)
     {predict the direction,\\step along it,\\go again};
   \node[font=\scriptsize, text width=2.65cm, align=left, anchor=north west] at (7.55,3.45)
@@ -87,14 +87,14 @@
 
   % ---------------- the same conditioning enters the model at every call ----------------
   \draw[feed] (latA.east) -- (8.60,10.25) -- (8.60,8.05) -- (9.60,8.05);
-  \draw[feed] (latB.east) -- (8.60,8.45);
+  \draw[feed] (latB.east) -- (8.60,8.35);
   \draw[feed] (emb.south) -- (9.60,8.05);
-  \fill[black!75] (8.60,8.45) circle (1.2pt);
+  \fill[black!75] (8.60,8.35) circle (1.2pt);
   \fill[black!75] (9.60,8.05) circle (1.2pt);
   \draw[flow] (9.60,8.05) -- (9.60,8.05 |- model.north);
   \node[font=\scriptsize, fill=white, inner sep=1.5pt, align=center, text width=3.00cm,
-    anchor=north east] at (10.15,6.88) {the same conditioning\\at every step};
-  \node[arrowlab, anchor=east] at (8.45,9.45) {2 image latents};
+    anchor=north east] at (10.15,7.00) {the same conditioning\\at every step};
+  \node[arrowlab, anchor=east] at (8.45,9.37) {2 image latents};
 
   % ---------------- notes ----------------
   \node[noteblock, text width=4.90cm, anchor=north west] at (0.15,2.19)

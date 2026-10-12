@@ -45,7 +45,7 @@
     {compare the guess with the true direction along the line};
   \node[block, text width=1.75cm, minimum height=1.55cm, right=0.40cm of lt2] (lt3)
     {nudge the weights};
-  \draw[feed] (tp2) -- ++(0,-0.85) -| (lt1.north);
+  \draw[feed] (tp2) -- ++(0,-0.70) -| (lt1.north);
   \draw[flow] (lt1) -- (lt2);
   \draw[flow] (lt2) -- (lt3);
   \draw[flow] (lt3.south) -- ++(0,-0.65) coordinate (retcT) -- (retcT -| lt1.south) -- (lt1.south);
@@ -78,9 +78,9 @@
 
   % the same network drives every Euler step
   \coordinate (busY) at (0,4.46);
-  \draw[feed] (net.south) -- (net.south |- busY);
-  \draw[draw=black!75, line width=0.7pt, dashed] (st1.north |- busY) -- (st4.north |- busY);
-  \foreach \s in {st1,st2,st3,st4}{\draw[feed] (\s.north |- busY) -- (\s.north);}
+  \draw[flow] (net.south) -- (net.south |- busY);
+  \draw[draw=black!75, line width=0.7pt] (st1.north |- busY) -- (st4.north |- busY);
+  \foreach \s in {st1,st2,st3,st4}{\draw[flow] (\s.north |- busY) -- (\s.north);}
 
   \node[anchor=west] (headB) at (0.15,2.35) {\textbf{What we actually run}};
   \node[font=\scriptsize, anchor=west, right=0.65cm of headB] (dirB) {four Euler steps};

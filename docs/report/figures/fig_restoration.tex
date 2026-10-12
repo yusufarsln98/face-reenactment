@@ -46,13 +46,13 @@
   \draw[flow] (comp) -- (res);
 
   % ---------------- notes ----------------
-  \node[noteblock, text width=7.00cm, anchor=north west] at (0.11,-2.70)
+  \node[noteblock, execute at begin node=\raggedright, text width=7.00cm, anchor=north west] at (0.11,-2.70)
     {The weights are the official release. The network was rebuilt in project code
      because the published wrappers do not import.};
-  \node[noteblock, text width=7.50cm, anchor=north west] at (7.45,-2.70)
+  \node[noteblock, execute at begin node=\raggedright, text width=7.50cm, anchor=north west] at (7.45,-2.70)
     {The fidelity weight does nothing. The official inference path passes no weight
      argument.};
-  \node[noteblock, text width=5.50cm, anchor=north west] at (9.60,2.20)
+  \node[noteblock, execute at begin node=\raggedright, text width=5.50cm, anchor=north west] at (9.60,2.20)
     {Restoration sees one frame at a time, so it cannot remove flicker.};
 
   \end{tikzpicture}

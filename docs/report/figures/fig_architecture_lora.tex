@@ -47,7 +47,7 @@
     {text tokens,\\width 7680};
 
   % the timestep embedding feeds both block rows and the final layer
-  \path (ds.east) -- ++(0.25,0) coordinate (tbus);
+  \path (ds.east) -- ++(0.55,0) coordinate (tbus);
   \draw[draw=black!75, line width=0.7pt, dashed] (tbus |- ds.center) -- (tbus |- fin.south);
   \foreach \s in {ds,ss,fin}{\draw[feed] (tbus |- \s.center) -- (\s.east);}
   \node[block, text width=2.10cm, minimum height=1.20cm, anchor=west] (tstep)
@@ -60,8 +60,8 @@
     at ([xshift=4.54cm]ds.north east) {layer input $x$};
 
   % a bracket spans the two block rows and runs to the zoom
-  \coordinate (brT) at ([xshift=0.59cm]ds.north east);
-  \coordinate (brB) at ([xshift=0.59cm]ss.south east);
+  \coordinate (brT) at ([xshift=0.95cm]ds.north east);
+  \coordinate (brB) at ([xshift=0.95cm]ss.south east);
   \draw[draw=black!75, line width=0.7pt] (brT) -- (brB);
   \draw[draw=black!75, line width=0.7pt] ([xshift=-0.18cm]brT) -- (brT);
   \draw[draw=black!75, line width=0.7pt] (brB) -- ([xshift=-0.18cm]brB);
@@ -100,7 +100,7 @@
   \coordinate (notetop) at ([yshift=-0.35cm]latout.south);
   \node[noteblock, text width=2.10cm, anchor=north west] at (0.45,0 |- notetop)
     {This layer stack is the published layout. We did not change it.};
-  \node[noteblock, text width=4.40cm, anchor=north west] at (3.20,0 |- notetop)
+  \node[noteblock, text width=4.40cm, anchor=north west] at (4.425,0 |- notetop)
     {Only A and B are trained. $W$ never changes, so the adapter is small and it can be
      removed again.};
   \node[noteblock, text width=4.40cm, anchor=north west] at (10.70,0 |- notetop)

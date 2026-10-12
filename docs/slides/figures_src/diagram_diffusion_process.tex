@@ -39,24 +39,24 @@
 \node[box, minimum width=3.30cm, minimum height=0.72cm] (sample) at (9.15,4.16) {noisy sample\\at a random time $t$};
 \node[box, minimum width=3.00cm, minimum height=0.72cm] (pure)  at (13.68,4.16) {pure noise};
 
-\node[rowlab] at (5.50,4.78) {Training};
+\node[rowlab] at (0.7797,4.78) {Training};
 
 % the direction the model learns to predict: from the noisy sample to the image
-\draw[ret] (8.40,3.65) -- (8.40,3.38) -- (1.56,3.38) -- (clean.south);
+\draw[ret] (8.10,0 |- sample.south) -- (8.10,3.38) -- (1.56,3.38) -- (clean.south);
 \node[note] at (4.98,3.38) {predict the direction};
 
 % ---------------- shared network box ----------------
 \node[box, minimum width=2.70cm, minimum height=0.60cm] (net) at (9.15,2.75) {one network};
-\draw[ar] (net.north) -- (9.15,3.65);
+\draw[ar] (net.north) -- (sample.south);
 \draw[ar] (net.south) -- (9.15,1.92);
 
 % ---------------- bottom row: generation ----------------
-\node[box, minimum width=2.40cm, minimum height=0.72cm] (gnoise) at (1.26,1.56) {pure noise};
-\node[box, minimum width=2.00cm, minimum height=0.72cm] (d1) at (4.024,1.56) {Euler step};
-\node[box, minimum width=2.00cm, minimum height=0.72cm] (d2) at (6.588,1.56) {Euler step};
-\node[box, minimum width=2.00cm, minimum height=0.72cm] (d3) at (9.152,1.56) {Euler step};
-\node[box, minimum width=2.00cm, minimum height=0.72cm] (d4) at (11.716,1.56) {Euler step};
-\node[box, minimum width=1.90cm, minimum height=0.72cm] (img) at (14.230,1.56) {image};
+\node[box, minimum width=2.40cm, minimum height=0.72cm] (gnoise) at (1.3764,1.56) {pure noise};
+\node[box, minimum width=2.00cm, minimum height=0.72cm] (d1) at (4.0918,1.56) {Euler step};
+\node[box, minimum width=2.00cm, minimum height=0.72cm] (d2) at (6.6073,1.56) {Euler step};
+\node[box, minimum width=2.00cm, minimum height=0.72cm] (d3) at (9.1227,1.56) {Euler step};
+\node[box, minimum width=2.00cm, minimum height=0.72cm] (d4) at (11.6382,1.56) {Euler step};
+\node[box, minimum width=1.90cm, minimum height=0.72cm] (img) at (14.1036,1.56) {image};
 
 \draw[ar] (gnoise.east) -- (d1.west);
 \draw[ar] (d1.east) -- (d2.west);
@@ -65,10 +65,10 @@
 \draw[ar] (d4.east) -- (img.west);
 
 % direction annotation above the generation row
-\draw[draw=secondaryNavy, line width=0.6pt] (0.06,2.20) -- (15.18,2.20);
-\node[note] at (5.00,2.20) {steps along the predicted direction};
+\draw[draw=secondaryNavy, line width=0.6pt] (0.1764,2.20) -- (15.0536,2.20);
+\node[note] at (2.5136,2.20) {steps along the predicted direction};
 
-\node[rowlab] at (7.62,0.72) {Generation, four steps};
+\node[rowlab] at (1.7957,0.72) {Generation, four steps};
 
 \end{tikzpicture}
 \end{document}
