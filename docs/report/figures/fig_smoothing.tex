@@ -1,0 +1,68 @@
+% Figure: the temporal smoothing stage (optical flow between neighbouring frames).
+% Facts come from diffusion/REPORT.md, section 5.
+% Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{positioning,arrows.meta}
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[
+    x=1cm, y=1cm,
+    font=\small,
+    block/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=blue!10, align=center, inner sep=4pt, minimum height=9mm},
+    inputblock/.style={block, fill=green!12},
+    stageblock/.style={block, fill=orange!15},
+    noteblock/.style={rectangle, rounded corners=2pt, draw=black!45, dashed,
+      fill=red!8, align=left, inner sep=3pt, font=\scriptsize},
+    flow/.style={->, >=Latex, line width=0.7pt, draw=black!75},
+    arrowlab/.style={font=\scriptsize, fill=white, inner sep=1pt},
+  ]
+
+  % ---------------- three stacked input frames ----------------
+  \node[inputblock, text width=1.35cm] (f0) at (1.15,2.05) {frame t-1};
+  \node[inputblock, text width=1.35cm] (f1) at (1.15,0.00) {frame t};
+  \node[inputblock, text width=1.35cm] (f2) at (1.15,-2.05) {frame t+1};
+
+  % the window of frames enters the stage on one line
+  \draw[draw=black!75, line width=0.7pt] (f0.east) -- (2.35,2.05);
+  \draw[draw=black!75, line width=0.7pt] (f1.east) -- (2.35,0.00);
+  \draw[draw=black!75, line width=0.7pt] (f2.east) -- (2.35,-2.05);
+  \draw[draw=black!75, line width=0.7pt] (2.35,-2.05) -- (2.35,2.05);
+
+  % ---------------- main row ----------------
+  \node[stageblock, text width=3.10cm] (est) at (4.45,0)
+    {estimate the\\dense motion\\[2pt]{\scriptsize flow between frame t\\and each neighbour}};
+  \node[stageblock, text width=3.20cm] (warp) at (8.85,0)
+    {warp both\\neighbours onto\\frame t\\[2pt]{\scriptsize the same surface point\\across time}};
+  \node[stageblock, text width=1.60cm] (blend) at (12.00,0)
+    {blend\\[2pt]{\scriptsize with frame t}};
+  \node[inputblock, text width=1.70cm] (out) at (14.35,0)
+    {smoothed\\frame t};
+
+  \draw[flow] (2.35,0) -- (est.west);
+  \draw[flow] (est.east) -- (warp.west);
+  \node[arrowlab, anchor=south] at (6.62,0.04) {motion};
+  \draw[flow] (warp.east) -- (blend.west);
+  \draw[flow] (blend.east) -- (out.west);
+
+  % the two neighbours also reach the warp
+  \draw[draw=black!75, line width=0.7pt] (2.35,2.05) -- (2.35,2.95);
+  \draw[flow] (2.35,2.95) -- (8.85,2.95) -- (warp.north);
+  \node[arrowlab] at (5.30,2.95) {neighbour frames};
+
+  % ---------------- strength input to the blend ----------------
+  \node[block, text width=1.90cm] (str) at (12.00,-1.75) {strength 0.3};
+  \draw[flow] (str.north) -- (blend.south);
+
+  % ---------------- notes ----------------
+  \node[noteblock, text width=6.90cm, anchor=north west] at (0.34,-2.95)
+    {A per-pixel deflicker is cheaper. It averages each pixel with its temporal
+     neighbours, and it removes real motion as well as the boil.};
+  \node[noteblock, text width=7.20cm, anchor=north west] at (7.90,-2.75)
+    {At strength 0.3 the result matches the motion level of the unswapped footage.
+     At 0.6 the pass sits below it, which is over-smoothing.};
+
+  \end{tikzpicture}
+  \caption{The temporal smoothing stage. Each frame is compared with its two
+    neighbours: the dense motion is estimated, the neighbours are warped onto frame t
+    and the three are blended at strength 0.3.}
+  \label{fig:smoothing}
+\end{figure}

@@ -5,8 +5,18 @@
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 \usepackage{cite}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+\graphicspath{{figures/}}
+
+% Float placement: let a page hold several figures and be mostly figures.
+\setcounter{topnumber}{3}
+\setcounter{totalnumber}{5}
+\renewcommand{\topfraction}{0.90}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.7}
 
 \title{Exploring DeepFakes: Face Reenactment Report}
 \author{}
@@ -15,6 +25,8 @@
 \begin{document}
 
 \maketitle
+
+\input{sections/04_diffusion}
 
 % Report content will be added here
 

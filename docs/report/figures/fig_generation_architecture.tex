@@ -1,0 +1,100 @@
+% Figure: architecture of the generation stage (conditioning, denoising, decoding).
+% Facts and numbers come from diffusion/REPORT.md.
+% Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{arrows.meta}
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[
+    x=1cm, y=1cm,
+    font=\small,
+    block/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=blue!10, align=center, inner sep=4pt, minimum height=9mm},
+    inputblock/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=green!12, align=center, inner sep=4pt, minimum height=9mm},
+    stageblock/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=orange!15, align=center, inner sep=4pt, minimum height=9mm},
+    noteblock/.style={rectangle, rounded corners=2pt, draw=black!45, dashed,
+      fill=red!8, align=left, inner sep=3pt, font=\scriptsize},
+    flow/.style={->, >=Latex, line width=0.7pt, draw=black!75},
+    bundle/.style={->, >=Latex, line width=1.2pt, draw=black!75},
+    feed/.style={line width=0.7pt, draw=black!75},
+    arrowlab/.style={font=\scriptsize, fill=white, inner sep=1pt},
+  ]
+
+  % ---------------- conditioning (top) ----------------
+  \node[inputblock, text width=2.55cm] (prompt) at (1.42,4.10)
+    {\textbf{Fixed prompt,}\\\textbf{409 characters}\\[1pt]\scriptsize names Picture 1
+     and Picture 2};
+  \node[block, text width=4.45cm] (enc) at (5.60,4.10)
+    {\textbf{Qwen3-4B text encoder}\\[1pt]\scriptsize CPU, 4 bit, about 80 s once per
+     session, then its memory is freed};
+  \node[block, text width=2.95cm] (emb) at (9.99,4.10) {\textbf{text embeddings}};
+  \draw[flow] (prompt.east) -- (enc.west);
+  \draw[flow] (enc.east) -- (emb.west);
+
+  % ---------------- denoising chain (middle) ----------------
+  \node[block, text width=4.45cm] (flux) at (2.37,2.10)
+    {\textbf{FLUX.2-klein-4B}\\[1pt]\scriptsize 4 bit GGUF};
+  \node[block, text width=5.70cm] (steps) at (8.19,2.10)
+    {\textbf{4 denoising steps}\\[1pt]\scriptsize guided at every step};
+  \node[block, text width=1.30cm] (dec) at (12.36,2.10) {\textbf{VAE}\\\textbf{decode}};
+  \node[inputblock, text width=1.60cm] (frame) at (14.40,2.10)
+    {\textbf{512x512}\\\textbf{frame}};
+  \node[block, text width=2.60cm] (lora) at (1.74,0.35)
+    {\textbf{LoRA adapter}\\[1pt]\scriptsize 100 modules};
+  \draw[flow] (lora.north) -- (flux.south);
+  \draw[flow] (flux.east) -- (steps.west);
+  \draw[flow] (steps.east) -- (dec.west);
+  \draw[flow] (dec.east) -- (frame.west);
+
+  % ---------------- image branches (lower left) ----------------
+  \node[inputblock, text width=2.10cm] (bodyf) at (1.19,-2.40)
+    {\textbf{Body frame}\\\textbf{512x512}\\[1pt]\scriptsize centre crop of
+     the source video};
+  \node[block, text width=1.30cm] (vaeA) at (3.57,-2.40) {\textbf{VAE}\\\textbf{encode}};
+  \node[block, text width=2.40cm] (latA) at (6.10,-2.40)
+    {\textbf{64x64x32 latent}\\[1pt]\scriptsize about 1024 tokens};
+  \draw[flow] (bodyf.east) -- (vaeA.west);
+  \draw[flow] (vaeA.east) -- (latA.west);
+
+  \node[inputblock, text width=1.70cm] (port) at (0.99,-4.40)
+    {\textbf{Portrait}\\\textbf{256x256}\\[1pt]\scriptsize identity only};
+  \node[block, text width=1.30cm] (vaeB) at (3.57,-4.40) {\textbf{VAE}\\\textbf{encode}};
+  \node[block, text width=2.60cm] (latB) at (6.20,-4.40)
+    {\textbf{about 256 tokens}\\[1pt]\scriptsize identity only};
+  \draw[flow] (port.east) -- (vaeB.west);
+  \draw[flow] (vaeB.east) -- (latB.west);
+
+  % ---------------- conditioning into the denoising steps ----------------
+  \draw[flow] (emb.south -| 10.10,0) -- (10.10,2.66);
+  \draw[feed] (latA.east) -- (8.40,-2.40) -- (8.40,0.90) -- (8.95,0.90);
+  \draw[feed] (latB.east) -- (9.40,-4.40) -- (9.40,0.90) -- (8.95,0.90);
+  \draw[bundle] (8.95,0.90) -- (8.95,1.60);
+  \node[font=\scriptsize, anchor=east, fill=white, inner sep=1pt] at (8.15,0.88) {2 image latents};
+
+  % ---------------- notes ----------------
+  \node[noteblock, text width=4.50cm, anchor=north west] at (3.50,0.60)
+    {The LoRA changes 99.5 percent of the pixels against the unadapted model, so it
+     changes the task, not the style.};
+  \node[noteblock, text width=5.30cm, anchor=north west] at (9.80,1.13)
+    {Four steps are enough. The base model is step distilled. Eight steps looked
+     the same and took twice the time.};
+  \node[noteblock, text width=5.30cm, anchor=north west] at (9.80,-0.27)
+    {The order of the two pictures is part of the contract. Reversing them gives a
+     plausible image with the wrong head.};
+  \node[noteblock, text width=5.30cm, anchor=north west] at (9.80,-4.00)
+    {A 512 pixel reference does not fit in the remaining memory. 256 pixels is the
+     measured maximum.};
+
+  % ---------------- legend ----------------
+  \node[font=\scriptsize, anchor=north west] (leg) at (9.90,-2.30)
+    {\begin{tabular}{@{}c@{\hspace{3pt}}l@{}}
+       \tikz\fill[draw=black!70,line width=0.4pt,green!12] (0,0) rectangle (0.30,0.20); & input image\\
+       \tikz\fill[draw=black!70,line width=0.4pt,blue!10]  (0,0) rectangle (0.30,0.20); & model block\\
+       \tikz\fill[draw=black!45,line width=0.4pt,red!8]    (0,0) rectangle (0.30,0.20); & note\\
+     \end{tabular}};
+
+  \end{tikzpicture}
+  \caption{Inside the generation stage: text conditioning, the image latents, the
+    denoiser with its LoRA adapter, and the four denoising steps.}
+  \label{fig:generation_architecture}
+\end{figure}

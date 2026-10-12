@@ -1,0 +1,63 @@
+% Figure: the face restoration stage (detect, align, restore, composite).
+% Facts come from diffusion/REPORT.md, section 4.
+% Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{positioning,arrows.meta}
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[
+    x=1cm, y=1cm,
+    font=\small,
+    block/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=blue!10, align=center, inner sep=4pt, minimum height=9mm},
+    inputblock/.style={block, fill=green!12},
+    stageblock/.style={block, fill=orange!15},
+    noteblock/.style={rectangle, rounded corners=2pt, draw=black!45, dashed,
+      fill=red!8, align=left, inner sep=3pt, font=\scriptsize},
+    flow/.style={->, >=Latex, line width=0.7pt, draw=black!75},
+    arrowlab/.style={font=\scriptsize, fill=white, inner sep=1pt},
+  ]
+
+  % ---------------- main row: frame in, detect and align, restore, composite, frame out
+  \node[inputblock, text width=1.70cm] (raw) at (1.10,0)
+    {raw frame\\[2pt]{\scriptsize as generated}};
+  \node[stageblock, text width=2.30cm] (det) at (3.95,0)
+    {detect and\\align the face\\[2pt]{\scriptsize a crop is taken}};
+
+  % the restoration network: one container with a stack of three inner blocks
+  \node[stageblock, minimum width=3.60cm, minimum height=4.90cm] (net) at (7.55,0) {};
+  \node[anchor=north, inner sep=1pt] (nett) at ([yshift=-4pt]net.north)
+    {\textbf{restoration network}};
+  \node[anchor=north, inner sep=1pt, font=\scriptsize, text width=3.30cm, align=center]
+    (nets) at ([yshift=-2pt]nett.south)
+    {GFPGAN v1.4, trained to map degraded faces onto clean ones};
+  \node[block, text width=2.60cm, minimum height=6mm] (enc) at (7.55,0.10) {encoder};
+  \node[block, text width=2.60cm, minimum height=6mm] (dbl) at (7.55,-0.80) {detail blocks};
+  \node[block, text width=2.60cm, minimum height=6mm] (dec) at (7.55,-1.70) {decoder};
+  \draw[flow] (enc.south) -- (dbl.north);
+  \draw[flow] (dbl.south) -- (dec.north);
+
+  \node[stageblock, text width=2.30cm] (comp) at (11.15,0)
+    {composite the\\crop back\\[2pt]{\scriptsize into the frame}};
+  \node[inputblock, text width=1.75cm] (res) at (14.05,0)
+    {restored\\frame};
+
+  \draw[flow] (raw) -- (det);
+  \draw[flow] (det) -- (net);
+  \draw[flow] (net) -- (comp);
+  \draw[flow] (comp) -- (res);
+
+  % ---------------- notes ----------------
+  \node[noteblock, text width=7.00cm, anchor=north west] at (0.11,-2.70)
+    {The weights are the official release. The network was rebuilt in project code
+     because the published wrappers do not import.};
+  \node[noteblock, text width=7.50cm, anchor=north west] at (7.45,-2.70)
+    {The fidelity weight does nothing. The official inference path passes no weight
+     argument.};
+  \node[noteblock, text width=5.50cm, anchor=north west] at (9.60,2.20)
+    {Restoration sees one frame at a time, so it cannot remove flicker.};
+
+  \end{tikzpicture}
+  \caption{The face restoration stage. Each raw frame is taken on its own: the face is
+    detected and aligned, a crop runs through the restoration network, and the restored
+    crop is composited back into the frame.}
+  \label{fig:restoration}
+\end{figure}

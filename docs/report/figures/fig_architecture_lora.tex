@@ -1,0 +1,98 @@
+% Figure: the denoiser drawn as a stack of layers, and the LoRA adapter on one linear layer.
+% Facts come from the published model repository and model card.
+% Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{positioning,arrows.meta},
+%                            and amsmath for \frac in the adapter formula.
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[
+    x=1cm, y=1cm,
+    font=\small,
+    block/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=blue!10, align=center, inner sep=4pt, minimum height=9mm},
+    inputblock/.style={block, fill=green!12},
+    stageblock/.style={block, fill=orange!15},
+    noteblock/.style={rectangle, rounded corners=2pt, draw=black!45, dashed,
+      fill=red!8, align=left, inner sep=3pt, font=\scriptsize},
+    flow/.style={->, >=Latex, line width=0.7pt, draw=black!75},
+    feed/.style={->, >=Latex, line width=0.7pt, draw=black!75, dashed},
+    arrowlab/.style={font=\scriptsize, fill=white, inner sep=1pt},
+  ]
+
+  % ================= left part: the denoiser as a stack of layers =================
+  \node[inputblock, anchor=north, text width=6.40cm, minimum height=0.90cm] (lat) at (6.54,10.55)
+    {\textbf{latent token}, 128 channels};
+  \node[block, text width=6.40cm, minimum height=0.90cm, below=0.32cm of lat] (proj)
+    {\textbf{input projection} to width 3072};
+  \node[block, text width=6.40cm, minimum height=1.15cm, below=0.32cm of proj] (tstep)
+    {\textbf{timestep embedding}\\[1pt]\scriptsize sets scale and shift for every block};
+  \node[block, text width=6.40cm, minimum height=1.15cm, below=0.32cm of tstep] (ds)
+    {\textbf{5 double-stream blocks}\\[1pt]\scriptsize text and image tokens stay apart,
+     joint attention};
+  \node[block, text width=6.40cm, minimum height=0.90cm, below=0.32cm of ds] (cat)
+    {\textbf{concatenate the two streams}};
+  \node[block, text width=6.40cm, minimum height=1.15cm, below=0.32cm of cat] (ss)
+    {\textbf{20 single-stream blocks}\\[1pt]\scriptsize one stream, joint attention};
+  \node[block, text width=6.40cm, minimum height=1.15cm, below=0.32cm of ss] (fin)
+    {\textbf{final layer}\\[1pt]\scriptsize adaptive layer norm, project to 128 channels};
+  \node[inputblock, text width=6.40cm, minimum height=0.90cm, below=0.32cm of fin] (latout)
+    {\textbf{latent}, to the decoder};
+  \foreach \a/\b in {lat/proj, proj/tstep, tstep/ds, ds/cat, cat/ss, ss/fin, fin/latout}
+    {\draw[flow] (\a.south) -- (\b.north);}
+
+  % the text encoder enters through joint attention (dashed = conditioning path)
+  \node[block, text width=2.10cm, left=0.70cm of cat] (enc)
+    {\textbf{Qwen3-4B}\\[1pt]\scriptsize text encoder};
+  \coordinate (txtcorner) at (enc.north |- ds.center);
+  \draw[feed] (enc.north) -- (txtcorner) -- (ds.west);
+  \path (txtcorner) -- (ds.west) coordinate[midway] (txtmid);
+  \node[arrowlab, align=center, text width=1.70cm, anchor=south] at ([yshift=0.14cm]txtmid)
+    {text tokens,\\width 7680};
+
+  % the timestep embedding modulates every block (dashed = conditioning path)
+  \draw[feed] (tstep.east) -- ++(0.35,0) coordinate (tbus);
+  \draw[draw=black!75, line width=0.7pt, dashed] (tbus) -- (tbus |- fin.center);
+  \foreach \s in {ds,ss,fin}{\draw[feed] (tbus |- \s.center) -- (\s.east);}
+
+  % ================= right part: how the adapter attaches =================
+  \node[inputblock, text width=2.40cm, minimum height=0.75cm] (layin) at (12.45,10.10)
+    {layer input $x$};
+  \node[block, text width=1.70cm, minimum height=2.35cm] (wgt) at (11.55,7.575)
+    {\textbf{frozen weight $W$}};
+  \node[block, text width=0.50cm, minimum height=0.90cm] (bA) at (13.35,8.30) {\textbf{A}};
+  \node[block, text width=0.50cm, minimum height=0.90cm] (bB) at (13.35,6.85) {\textbf{B}};
+  \draw[flow] (bA.south) -- (bB.north);
+
+  \coordinate (br) at (12.45,9.30);
+  \draw[draw=black!75, line width=0.7pt] (layin.south) -- (br);
+  \draw[draw=black!75, line width=0.7pt] (br -| wgt.north) -- (br -| bA.north);
+  \draw[flow] (br -| wgt.north) -- (wgt.north);
+  \draw[flow] (br -| bA.north) -- (bA.north);
+
+  \coordinate (mg) at (12.45,6.05);
+  \draw[flow] (wgt.south) -- (mg -| wgt.south);
+  \draw[flow] (bB.south) -- (mg -| bB.south);
+  \draw[draw=black!75, line width=0.7pt] (mg -| wgt.south) -- (mg -| bB.south);
+  \node[fill=white, inner sep=0.5pt] at (mg) {$+$};
+  \node[inputblock, text width=1.85cm, minimum height=0.75cm] (layout) at (12.45,5.30)
+    {output};
+  \draw[flow] (mg) -- (layout.north);
+  \node[font=\small] (formula) at (12.45,4.45) {$Wx + \frac{\alpha}{r}BAx$};
+
+  \node[font=\scriptsize, align=left, text width=1.05cm, anchor=west] (abl) at (13.90,7.575)
+    {rank $r$\\trained};
+
+  % ================= notes =================
+  \node[noteblock, text width=2.10cm, anchor=north west] at (0.12,3.40)
+    {This layer stack is the published layout. We did not change it.};
+  \node[noteblock, text width=4.40cm, anchor=north west] at (10.60,3.95)
+    {Only A and B are trained. $W$ never changes, so the adapter is small and it can be
+     removed again.};
+  \node[noteblock, text width=4.40cm, anchor=north west] at (10.60,2.10)
+    {The adapter has 100 modules. It teaches the base model the head swap task, so it changes
+     what the model does, not how it looks.};
+
+  \end{tikzpicture}
+  \caption{The denoiser as a stack of layers. The text encoder and the timestep embedding enter
+    as conditioning, and the adapter adds a small trained branch beside a frozen weight.}
+  \label{fig:architecture_lora}
+\end{figure}

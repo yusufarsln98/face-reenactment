@@ -1,0 +1,162 @@
+% Section 4: diffusion-based head swap with FLUX.2-klein-4B.
+% Numbers come from diffusion/faceswap_20_metrics_summary.csv and diffusion/REPORT.md.
+% Figure inputs are relative to docs/report/.
+
+\section{Diffusion-Based Head Swap}
+
+\subsection{Scope and hardware}
+We wanted to swap a video face with one from a selfie. The run had to stay on one laptop with a 4 GB NVIDIA GPU and 8 GB of system RAM. We sent no data to a cloud service.
+
+The output had to keep the source motion, expression, lighting and background. Only the head should change. The clip is 96 frames at 512x512 and lasts 3.2 seconds.
+
+\subsection{How we measured}
+Every number comes from one script run on the same 96 frames, and the results table reports it. Face change is how much the face region moves from one frame to the next. The unswapped footage sets the level to match, so a value far below it means the smoother removed real motion too. Consecutive identity is how similar a face is to the one before it, measured in a face recognition embedding, so higher is more stable. Identity to the portrait measures similarity to the reference portrait; the unswapped footage scores near zero because it is a different person. Hair noise is how much the hair region flickers, and lower is better; p95 marks the worst frames, the value 95 percent stay under.
+
+\subsection{Pipeline overview}
+The flow has four stages. Generation transfers the identity, restoration cleans each face with GFPGAN, smoothing removes the boil, and reassembly attaches the audio. Only the last stage writes a video file.
+
+The boil is the flicker that comes from generating each frame on its own. Figure~\ref{fig:pipeline_overview} shows the chain in order, with the cost of each stage.
+
+\input{figures/fig_pipeline_overview}
+\subsection{How the diffusion model works}
+A diffusion model learns one job: look at a noisy image and say what noise is in it. Training adds noise to clean images in small steps until only noise is left. The network guesses the noise at each level, and the guess is compared with the truth. The weights are then nudged.
+
+After training, the same network runs backwards. It starts from pure noise and removes its own guess at every step, so an image forms. The forward direction only exists for training, and we never run it to generate. Figure~\ref{fig:diffusion_process} draws both directions.
+
+We did not train the base model; we used a released checkpoint. The released model is step distilled, so four steps are enough for it. We could not tell the difference between four steps and eight, and eight took twice the time.
+
+\input{figures/fig_diffusion_process}
+\subsection{The denoiser and the LoRA adapter}
+The denoiser is a stack of transformer blocks (Figure~\ref{fig:architecture_lora}). A latent token of 128 channels is projected to width 3072. It passes through five double-stream blocks, then 20 single-stream blocks and a final layer. In the first part the text and image tokens stay apart, and they meet through joint attention.
+
+Later the two streams are joined into one. The final layer projects back to 128 channels for the decoder.
+
+The adapter is a small pair of matrices, A and B, trained beside each frozen weight. The block output adds a scaled product of A and B to the frozen term. Only A and B are trained, so the base weights never change. The adapter carries the head swap behaviour.
+
+\input{figures/fig_architecture_lora}
+\subsection{Generation}
+Generation (Figure~\ref{fig:generation_architecture}) covers conditioning, denoising and decoding. A fixed prompt of 409 characters names Picture 1 as the body and Picture 2 as the head.
+
+Qwen3-4B encodes the prompt once per session on the CPU, about 80 seconds, and its memory is then freed. Both pictures become VAE latents: the 512x512 body crop a 64x64x32 grid of about 1024 tokens, the 256x256 portrait about 256 tokens.
+
+FLUX.2-klein-4B renders each frame in four denoising steps (Figure~\ref{fig:denoising_loop}). The text embeddings and the two image latents guide every step. A community-trained LoRA adapter of 100 modules carries the head swap.
+
+The same VAE decodes the final latent into pixels. Picture order is part of the model contract, so a reversed order gives the wrong head.
+
+The generator runs as a 4-bit GGUF file, and 256 pixels is the largest reference that fits. A detector refuses a frame with more than one face, and the gate has no bypass.
+
+The output is 96 frames from 5.8 to 9.0 seconds of the source, all with one fixed seed. Each frame took 16.3 seconds, so the stage used 26.1 minutes.
+
+\input{figures/fig_generation_architecture}
+\input{figures/fig_denoising_loop}
+\subsubsection{Adapter version comparison}
+The recorded clip uses adapter v1 throughout. A newer adapter, v1.1, was released during the work, and we tested two prompt variants, A and B. Table~\ref{tab:adapters} compares the two versions.
+
+v1.1 ran, but it went far past the memory of the card, which is why it slowed down so much. The extra time was not worth it for us.
+
+We judged the look by eye and preferred v1, so the clip kept the v1 output. No metric script was run on v1.1, so every other number here comes from v1. The grids in Figure~\ref{fig:lora_compare} are the only evidence.
+
+\begin{table}[tb]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}l l l@{}}
+    \toprule
+    & v1 (recorded) & v1.1 (new) \\
+    \midrule
+    Seconds per frame & 16.34 & about 199, twelve times slower \\
+    Peak VRAM allocated & 3.60 GiB & 4.68 GiB, past the 4.0 GiB of the card \\
+    Peak system RAM & 5.48 GiB & 5.50 GiB \\
+    Cost for 96 frames & 26 minutes & about 5.3 hours \\
+    \bottomrule
+  \end{tabular}
+  \caption{Adapter v1 against v1.1 on the same machine; only v1 was measured with the metric script.}
+  \label{tab:adapters}
+\end{table}
+
+\input{figures/fig_lora_compare}
+\subsection{Face restoration}
+GFPGAN v1.4 cleans every frame (Figure~\ref{fig:restoration}). It detects and aligns the face, runs a restoration network, and composites the crop back. The weights are official, but we built the network in project code because the published wrappers do not import.
+
+The stage costs 0.23 seconds per frame. The frames looked cleaner to us, and the mean face change came down, though the tail improved less.
+
+Hair noise fell slightly, a small gain on its own. The fidelity weight does nothing, because the official inference path passes no weight argument. Restoration cannot remove flicker, because it sees one frame at a time.
+
+\input{figures/fig_restoration}
+\subsection{Temporal smoothing}
+The smoothing stage compares frames with each other and removes the boil (Figure~\ref{fig:smoothing}). The per-pixel deflicker averages each pixel with its temporal neighbours, and it is too strong. It costs 0.007 seconds per frame.
+
+The deflicker pushes the face change below the unswapped level, so it removes real motion as well as the boil. Optical flow estimates the dense motion between neighbouring frames and warps them onto the current one. Because it follows the same surface point across time, a moving head does not smear. It costs 0.036 seconds per frame.
+
+The control fixes the real motion level at 6.66, and the distance column is the face change minus that level. At strength 0.3 the chained pass comes close enough to the control, and the raw pass stays above it. A stronger setting sits below the control, which is over-smoothing.
+
+The recommended output is the chained set at strength 0.3. It beats the flow-only variant on face change, on the tail and on hair noise. Only consecutive identity is slightly lower. The deflicker reaches its low face change only by destroying motion, so we kept flow.
+
+\begin{table}[tb]
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{@{}l r r r r r r@{}}
+    \toprule
+    \begin{tabular}[c]{@{}l@{}}Frames\\smoothed\end{tabular} & Strength &
+    \begin{tabular}[c]{@{}r@{}}Face\\change\end{tabular} &
+    \begin{tabular}[c]{@{}r@{}}Distance from\\the control\end{tabular} & p95 &
+    \begin{tabular}[c]{@{}r@{}}Consecutive\\identity\end{tabular} &
+    \begin{tabular}[c]{@{}r@{}}Hair\\noise\end{tabular} \\
+    \midrule
+    Raw & 0.3 & 6.9599 & +0.3034 & 16.2944 & 0.9330 & 32.2358 \\
+    Raw & 0.6 & 6.6663 & +0.0098 & 15.6581 & 0.9391 & 32.0603 \\
+    Restored, then flow & 0.3 & 6.6303 & -0.0262 & 15.2802 & 0.9377 & 31.7306 \\
+    Restored, then flow & 0.6 & 6.3071 & -0.3494 & 14.7575 & 0.9431 & 31.5448 \\
+    \bottomrule
+  \end{tabular}
+  \caption{The smoothing sweep: two frame sets at two strengths, all measured on the same 96 frames.}
+  \label{tab:smooth}
+\end{table}
+
+\input{figures/fig_smoothing}
+\subsection{Reassembly}
+The encoder turns a frame set into a playable clip (Figure~\ref{fig:reassembly}). It writes H.264 at 29.969 fps, muxes the original audio back, and trims both streams. Its output is a 512x512 clip of 3.203 seconds.
+
+The encode adds nothing to the pixels. In the raw swapped set the face boils, and the results table holds the values.
+
+\input{figures/fig_reassembly}
+\subsection{Results}
+All numbers come from one script on the same 96 frames. Lower hair noise is better, and higher identity values are better. Face change should sit near the control level, because a value below it means the smoother removed real motion. The control row is the unswapped source footage.
+
+\begin{table}[tb]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}l r r r r r@{}}
+    \toprule
+    Stage & \begin{tabular}[c]{@{}r@{}}Face change\\(mean)\end{tabular} &
+    \begin{tabular}[c]{@{}r@{}}Face change\\(p95)\end{tabular} &
+    \begin{tabular}[c]{@{}r@{}}Consecutive\\identity\end{tabular} &
+    \begin{tabular}[c]{@{}r@{}}Identity to\\the portrait\end{tabular} &
+    \begin{tabular}[c]{@{}r@{}}Hair\\noise\end{tabular} \\
+    \midrule
+    \begin{tabular}[t]{@{}l@{}}Control (unswapped\\source footage)\end{tabular} & 6.6565 & 12.3488 & 0.9852 & $-0.0356$ & 31.5999 \\
+    Raw head swap & 7.4510 & 17.3794 & 0.9228 & 0.2153 & 32.5703 \\
+    Restoration & 7.1602 & 16.2097 & 0.9273 & 0.2153 & 32.0721 \\
+    Flow on the raw frames & 6.6663 & 15.6581 & 0.9391 & 0.2148 & 32.0603 \\
+    \begin{tabular}[t]{@{}l@{}}Restoration then flow,\\strength 0.3 (recommended)\end{tabular} & 6.6303 & 15.2802 & 0.9377 & 0.2152 & 31.7306 \\
+    Deflicker (alternative) & 5.6269 & 12.6650 & 0.9357 & 0.2106 & 31.8960 \\
+    \bottomrule
+  \end{tabular}
+  \caption{All measured variants on the same 96 frames.}
+  \label{tab:results}
+\end{table}
+
+Identity to the portrait confirms the swap direction. The unswapped footage scores near zero, and every swapped variant scores positive. The recommended set held up well against the control on the mean values. Figure~\ref{fig:stage_strip} shows the effect of each stage on one frame.
+
+\input{figures/fig_stage_strip}
+\subsection{Problems and decisions}
+Attaching the adapter before the first forward pass cost 46 to 48 seconds per frame. Attaching it after one plain pass cost 16 seconds per frame. Peak VRAM was the same in both orders.
+
+We standardised on the fast order. The internal cause was not established, but the effect reproduces exactly and explains an earlier timing discrepancy.
+
+One fixed seed covers the whole clip, so the noise input is constant. The boil still happens, because the model is sensitive to small input changes. Only a pass across frames reduces it.
+
+Memory set the last limit; larger references do not fit. The largest reference we could use is 256 pixels.
+
+\subsection{Limits}
+The results table shows a mean at the control level, but the tail stays high, so the picture still jumped on some frames. Each step works inside a frame or a short window, so no step removed that tail. The 256-pixel reference maximum is the second limit on this card.

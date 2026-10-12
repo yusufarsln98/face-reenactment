@@ -1,0 +1,53 @@
+% Figure: the reassembly stage (encode the frames, mux the source audio back).
+% Facts come from diffusion/REPORT.md, section 6.
+% Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{positioning,arrows.meta}
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[
+    x=1cm, y=1cm,
+    font=\small,
+    block/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=blue!10, align=center, inner sep=4pt, minimum height=9mm},
+    inputblock/.style={block, fill=green!12},
+    stageblock/.style={block, fill=orange!15},
+    noteblock/.style={rectangle, rounded corners=2pt, draw=black!45, dashed,
+      fill=red!8, align=left, inner sep=3pt, font=\scriptsize},
+    flow/.style={->, >=Latex, line width=0.7pt, draw=black!75},
+    arrowlab/.style={font=\scriptsize, fill=white, inner sep=1pt},
+  ]
+
+  % ---------------- the two inputs ----------------
+  \node[inputblock, text width=2.05cm] (vid) at (1.70,0.85) {smoothed frames};
+  \node[inputblock, text width=2.05cm] (aud) at (1.70,-0.85) {source audio};
+
+  % ---------------- main row ----------------
+  \node[stageblock, text width=2.75cm] (enc) at (5.55,0.85)
+    {encode H.264\\[2pt]{\scriptsize 29.969 fps, yuv420p,\\crf 18}};
+  \node[stageblock, text width=3.30cm] (mux) at (10.35,0.85)
+    {mux the audio back\\[2pt]{\scriptsize both streams are trimmed\\to the same length}};
+  \node[inputblock, text width=2.25cm] (out) at (14.15,0.85)
+    {final clip\\[2pt]{\scriptsize 512x512, 3.2 seconds}};
+
+  \draw[flow] (vid.east) -- (enc.west);
+  \draw[flow] (enc.east) -- (mux.west);
+  \node[arrowlab] at (7.81,0.85) {video};
+  \draw[flow] (mux.east) -- (out.west);
+
+  % ---------------- the audio path, around the encoder ----------------
+  \draw[flow] (aud.east) -- (10.35,-0.85) -- (mux.south);
+  \node[arrowlab] at (5.60,-0.85) {audio};
+
+  % ---------------- notes ----------------
+  \node[noteblock, text width=7.10cm, anchor=north west] at (0.54,-2.20)
+    {The encoder cannot change a pixel. It only writes what the stages before it
+     produced.};
+  \node[noteblock, text width=7.30cm, anchor=north west] at (8.10,2.60)
+    {The same script is the last stage of the whole flow, so the final video is a
+     later run of this encoder.};
+
+  \end{tikzpicture}
+  \caption{The reassembly stage. The smoothed frames are encoded as H.264 at the source
+    rate and the original audio is muxed back; both streams are trimmed to the same
+    length.}
+  \label{fig:reassembly}
+\end{figure}

@@ -1,0 +1,105 @@
+% Figure: the two directions of the diffusion model.
+% The forward direction is the training direction; the reverse direction is what the run uses.
+% Facts come from the published model repository and model card.
+% Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{positioning,arrows.meta}
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[
+    x=1cm, y=1cm,
+    font=\small,
+    block/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=blue!10, align=center, inner sep=4pt, minimum height=9mm},
+    inputblock/.style={block, fill=green!12},
+    stageblock/.style={block, fill=orange!15},
+    noteblock/.style={rectangle, rounded corners=2pt, draw=black!45, dashed,
+      fill=red!8, align=left, inner sep=3pt, font=\scriptsize},
+    flow/.style={->, >=Latex, line width=0.7pt, draw=black!75},
+    feed/.style={->, >=Latex, line width=0.7pt, draw=black!75, dashed},
+    arrowlab/.style={font=\scriptsize, fill=white, inner sep=1pt},
+  ]
+
+  % ================= top half: how it was trained =================
+  \node[anchor=west] (headT) at (0.15,10.35) {\textbf{How it was trained}};
+  \node[font=\scriptsize, anchor=west, right=0.75cm of headT] (dirT) {the forward direction};
+  \draw[flow] (dirT.east) -- ++(1.70,0);
+
+  \node[inputblock, anchor=west, text width=1.75cm, minimum height=1.15cm] (clean) at (0.15,9.35)
+    {clean\\image};
+  \node[stageblock, text width=1.45cm, minimum height=1.15cm, right=0.45cm of clean] (add1)
+    {add noise,\\[1pt]\scriptsize small};
+  \node[stageblock, text width=1.45cm, minimum height=1.15cm, right=0.45cm of add1] (add2)
+    {add noise,\\[1pt]\scriptsize more};
+  \node[stageblock, text width=1.45cm, minimum height=1.15cm, right=0.45cm of add2] (add3)
+    {add noise,\\[1pt]\scriptsize more};
+  \node[inputblock, text width=1.70cm, minimum height=1.15cm, right=0.45cm of add3] (noiseA)
+    {pure noise};
+  \draw[flow] (clean) -- (add1);
+  \draw[flow] (add1) -- (add2);
+  \draw[flow] (add2) -- (add3);
+  \draw[flow] (add3) -- (noiseA);
+
+  % ---------------- the training loop under that chain ----------------
+  \node[block, anchor=west, text width=3.20cm, minimum height=1.55cm] (lt1) at (0.15,7.75)
+    {the network sees a noisy image and guesses the noise};
+  \node[block, text width=3.20cm, minimum height=1.55cm, right=0.50cm of lt1] (lt2)
+    {compare the guess with the noise that was really added};
+  \node[block, text width=1.90cm, minimum height=1.55cm, right=0.50cm of lt2] (lt3)
+    {nudge the weights};
+  \draw[flow] (lt1) -- (lt2);
+  \draw[flow] (lt2) -- (lt3);
+  \draw[flow] (lt3.south) -- ++(0,-0.75) coordinate (retc) -- (retc -| lt1.south) -- (lt1.south);
+
+  % ---------------- the one box that both halves use ----------------
+  \path (lt1.center) -- (lt3.center) coordinate[midway] (loopmid);
+  \coordinate (retmid) at (loopmid |- retc);
+  \node[block, text width=3.40cm, minimum height=0.90cm] (net) at ([yshift=-1.00cm]retmid)
+    {\textbf{the same network}};
+  \draw[feed] (retmid) -- (net.north);
+
+  % ================= bottom half: what we actually run =================
+  \node[inputblock, anchor=west, text width=1.35cm, minimum height=1.15cm] (noiseB) at (0.15,3.65)
+    {pure\\noise};
+  \node[stageblock, text width=1.30cm, minimum height=1.15cm, right=0.45cm of noiseB] (st1)
+    {denoise\\step};
+  \node[stageblock, text width=1.30cm, minimum height=1.15cm, right=0.45cm of st1] (st2)
+    {denoise\\step};
+  \node[stageblock, text width=1.30cm, minimum height=1.15cm, right=0.45cm of st2] (st3)
+    {denoise\\step};
+  \node[stageblock, text width=1.30cm, minimum height=1.15cm, right=0.45cm of st3] (st4)
+    {denoise\\step};
+  \node[inputblock, text width=1.40cm, minimum height=1.15cm, right=0.45cm of st4] (latentB)
+    {clean\\latent};
+  \draw[flow] (noiseB) -- (st1);
+  \draw[flow] (st1) -- (st2);
+  \draw[flow] (st2) -- (st3);
+  \draw[flow] (st3) -- (st4);
+  \draw[flow] (st4) -- (latentB);
+
+  % the same network drives every denoise step
+  \coordinate (busY) at (0,4.40);
+  \draw[feed] (net.south) -- (net.south |- busY);
+  \draw[draw=black!75, line width=0.7pt, dashed] (st1.north |- busY) -- (st4.north |- busY);
+  \foreach \s in {st1,st2,st3,st4}{\draw[feed] (\s.north |- busY) -- (\s.north);}
+
+  \node[anchor=west] (headB) at (0.15,2.35) {\textbf{What we actually run}};
+  \node[font=\scriptsize, anchor=west, right=0.75cm of headB] (dirB) {the reverse direction};
+  \draw[flow] (dirB.east) -- ++(1.70,0);
+
+  % ================= notes =================
+  \node[noteblock, text width=3.55cm, anchor=north west] at (11.50,10.35)
+    {Training needs a very large image set and many GPU hours. We did not train this model.
+     We used a released checkpoint and trained only a small adapter on top of it.};
+  \node[noteblock, text width=6.95cm, anchor=west] at (7.70,5.40)
+    {The network only ever learns to remove noise. The reverse chain is what produces an image.};
+  \node[noteblock, text width=7.20cm, anchor=north west] at (0.15,1.85)
+    {The model is step distilled, so four steps are close to what a slow model would reach
+     in dozens of steps.};
+  \node[noteblock, text width=7.20cm, anchor=north west] at (7.65,1.85)
+    {We never run the forward direction. It only exists so the network can learn.};
+
+  \end{tikzpicture}
+  \caption{The two directions of the diffusion model. The forward direction adds noise and is
+    only used in training; the reverse direction removes noise and produces the image. Both
+    directions use one and the same network.}
+  \label{fig:diffusion_process}
+\end{figure}

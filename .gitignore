@@ -31,4 +31,18 @@ first-order-model/
 .vscode/
 .idea/
 
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.toc
+*.blg
+*.bbl
+
+# Local agent working folder, fetched reference material only
+.agent/
+
 

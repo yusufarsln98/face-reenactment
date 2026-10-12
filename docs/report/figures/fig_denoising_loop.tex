@@ -1,0 +1,51 @@
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[
+      font=\small,
+      block/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt, fill=blue!10, align=center, inner sep=4pt, minimum height=9mm},
+      inputblock/.style={block, fill=green!12},
+      stageblock/.style={block, fill=orange!15},
+      noteblock/.style={rectangle, rounded corners=2pt, draw=black!45, dashed, fill=red!8, align=left, inner sep=3pt, font=\scriptsize},
+      flow/.style={->, >=Latex, line width=0.7pt, draw=black!75}
+    ]
+    % main row: noise latent, four denoising steps, final latent, VAE decode, frame
+    \node[inputblock, text width=2.0cm] (noise) at (0,0)
+      {noise latent\\[2pt]{\scriptsize random start,\\one fixed seed}};
+    \node[stageblock, text width=1.1cm, right=0.45cm of noise] (step1) {step 1};
+    \node[stageblock, text width=1.1cm, right=0.45cm of step1] (step2) {step 2};
+    \node[stageblock, text width=1.1cm, right=0.45cm of step2] (step3) {step 3};
+    \node[stageblock, text width=1.1cm, right=0.45cm of step3] (step4) {step 4};
+    \node[block, text width=1.0cm, right=0.45cm of step4] (final) {final\\latent};
+    \node[block, text width=1.15cm, right=0.45cm of final] (vae) {VAE\\decode};
+    \node[block, text width=1.3cm, right=0.45cm of vae] (frame) {512x512\\frame};
+
+    % arrows along the row
+    \draw[flow] (noise) -- (step1);
+    \draw[flow] (step1) -- (step2);
+    \draw[flow] (step2) -- (step3);
+    \draw[flow] (step3) -- (step4);
+    \draw[flow] (step4) -- (final);
+    \draw[flow] (final) -- (vae);
+    \draw[flow] (vae) -- (frame);
+
+    % conditioning bundle that enters every step
+    \path (step1.center) -- (step4.center) coordinate[midway] (mid);
+    \coordinate (busY) at (0,-1.1);
+    \node[inputblock, text width=4.7cm, below=1.7cm of mid] (cond)
+      {conditioning\\[2pt]{\scriptsize text embeddings\\body latent, about 1024 tokens\\portrait latent, about 256 tokens}};
+    \draw[draw=black!75, line width=0.7pt] (cond.north) -- (cond.north |- busY);
+    \draw[draw=black!75, line width=0.7pt] (step1.south |- busY) -- (step4.south |- busY);
+    \foreach \s in {step1,step2,step3,step4}{\draw[flow] (\s.south |- busY) -- (\s.south);}
+
+    % notes
+    \node[noteblock, text width=5.2cm, above=0.95cm of mid] {16.3 seconds per frame, four steps.};
+    \node[noteblock, text width=8.6cm, below=0.7cm of cond]
+      {{The seed is fixed for the whole clip, so the same noise\\
+        goes into all 96 frames. The boil still happens.\\
+        It is not sampling noise.}};
+  \end{tikzpicture}
+  \caption{One generation: the denoising loop. The model starts from a noise latent, runs
+  four denoising steps that receive the conditioning at every step, and decodes the final
+  latent into a 512x512 frame.}
+  \label{fig:denoising_loop}
+\end{figure}

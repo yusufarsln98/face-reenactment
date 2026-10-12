@@ -1,0 +1,91 @@
+% Figure: pipeline overview of the face-reenactment flow (four stages).
+% Facts and numbers come from diffusion/REPORT.md.
+% Requires in the preamble: \usepackage{tikz} + \usetikzlibrary{arrows.meta}
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[
+    x=1cm, y=1cm,
+    font=\small,
+    block/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=blue!10, align=center, inner sep=4pt, minimum height=9mm},
+    inputblock/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=green!12, align=center, inner sep=4pt, minimum height=9mm},
+    stageblock/.style={rectangle, rounded corners=2pt, draw=black!70, line width=0.5pt,
+      fill=orange!15, align=center, inner sep=4pt, minimum height=9mm},
+    noteblock/.style={rectangle, rounded corners=2pt, draw=black!45, dashed,
+      fill=red!8, align=left, inner sep=3pt, font=\scriptsize},
+    flow/.style={->, >=Latex, line width=0.7pt, draw=black!75},
+    arrowlab/.style={font=\scriptsize, fill=white, inner sep=1pt},
+    cost/.style={draw=black!25, rounded corners=1pt, fill=gray!10, align=center,
+      inner sep=3pt, font=\scriptsize, text width=2.6cm},
+  ]
+
+  % ---------------- inputs (left) ----------------
+  \node[inputblock, inner xsep=2pt, text width=1.70cm, minimum height=1.46cm] (inP) at (0.96,1.90)
+    {\textbf{Portrait}\\\textbf{256x256}\\[1pt]\scriptsize identity only};
+  \node[inputblock, inner xsep=2pt, text width=2.10cm] (inB) at (1.16,0.00)
+    {\textbf{Body frame}\\\textbf{512x512}\\[1pt]\scriptsize centre crop of
+     the source video};
+  \node[inputblock, inner xsep=2pt, text width=2.55cm] (inF) at (1.38,-2.20)
+    {\textbf{Fixed prompt,}\\\textbf{409 characters}\\[1pt]\scriptsize names Picture 1
+     and Picture 2};
+
+  % ---------------- four stages (left to right) ----------------
+  \node[stageblock, inner xsep=2pt, text width=2.81cm, minimum height=1.60cm] (S1) at (4.455,0)
+    {\textbf{GENERATION}\\[1pt] makes the frames};
+  \node[stageblock, inner xsep=2pt, text width=3.03cm, minimum height=1.60cm] (S2) at (7.735,0)
+    {\textbf{RESTORATION}\\[1pt] cleans each face};
+  \node[stageblock, inner xsep=2pt, text width=2.62cm, minimum height=1.60cm] (S3) at (10.920,0)
+    {\textbf{SMOOTHING}\\[1pt] removes the boil};
+  \node[stageblock, inner xsep=2pt, text width=2.80cm, minimum height=1.60cm] (S4) at (13.990,0)
+    {\textbf{REASSEMBLY}\\[1pt] encodes and\\attaches the sound};
+
+  % ---------------- input arrows into stage 1 ----------------
+  \draw[flow] (inP.east) -- (S1.west |- 0,0.35);
+  \draw[flow] (inB.east) -- (S1.west);
+  \draw[flow] (inF.east) -- (S1.west |- 0,-0.35);
+
+  % ---------------- data between the stages ----------------
+  \draw[flow] (S1.east) -- (S2.west);
+  \draw[flow] (S2.east) -- (S3.west);
+  \draw[flow] (S3.east) -- (S4.west);
+  \node[arrowlab] at (6.04,1.15) {96 raw frames};
+  \node[arrowlab] at (9.43,1.15) {restored frames};
+  \node[arrowlab] at (12.41,1.15) {smoothed frames};
+
+  % ---------------- final output ----------------
+  \node[inputblock, text width=3.12cm, minimum height=1.10cm] (out) at (13.75,2.05)
+    {\textbf{512x512 clip, 3.203 s}};
+  \draw[flow] (S4.north -| 13.60,0) -- (13.60,1.47);
+
+  % ---------------- per-stage cost lines ----------------
+  \node[cost, anchor=north] at (4.455,-0.95)
+    {16.3 s per frame\\26.1 minutes in\\total};
+  \node[cost, anchor=north] at (7.735,-0.95)
+    {GFPGAN\\0.23 s per frame};
+  \node[cost, anchor=north] at (10.920,-0.95)
+    {optical flow\\strength 0.3\\0.036 s per frame};
+  \node[cost, anchor=north] at (13.990,-0.95)
+    {H.264, yuv420p, crf 18\\29.969 fps\\original audio muxed back};
+
+  % ---------------- notes ----------------
+  \node[noteblock, text width=5.60cm, anchor=north west] at (3.30,-3.45)
+    {\textbf{Safety gate:} a face detector counts faces before a frame is
+     rendered. A frame with more than one face is refused. There is no bypass.};
+  \node[noteblock, text width=5.85cm, anchor=north west] at (9.35,-3.45)
+    {Only the last stage writes a video file. Every earlier stage works on PNG frames.};
+
+  % ---------------- legend ----------------
+  \node[font=\scriptsize, anchor=north west] (leg) at (0.10,-3.45)
+    {\begin{tabular}{@{}c@{\hspace{3pt}}l@{}}
+       \tikz\fill[draw=black!70,line width=0.4pt,green!12] (0,0) rectangle (0.30,0.20); & input / output data\\
+       \tikz\fill[draw=black!70,line width=0.4pt,blue!10]  (0,0) rectangle (0.30,0.20); & processing block\\
+       \tikz\fill[draw=black!70,line width=0.4pt,orange!15](0,0) rectangle (0.30,0.20); & pipeline stage\\
+       \tikz\fill[draw=black!45,line width=0.4pt,red!8]    (0,0) rectangle (0.30,0.20); & note / gate\\
+     \end{tabular}};
+
+  \end{tikzpicture}
+  \caption{The four-stage pipeline: generation, restoration, smoothing and
+    reassembly, with the cost measured for each stage.}
+  \label{fig:pipeline_overview}
+\end{figure}
